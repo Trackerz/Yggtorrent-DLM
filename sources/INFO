@@ -1,10 +1,10 @@
 {
     "name": "YGGTorrent",
-    "displayname": "YGGTorrent.CH",
+    "displayname": "YGGTorrent",
     "description": "YGGTorrent Tracker privé",
-    "version": "1.0",
+    "version": "1.1",
     "accountsupport": true,
-    "site": "https://yggtorrent.ch/",
+    "site": "https://www.yggtorrent.ch/",
     "module": "search.php",
     "type": "search",
     "class": "YGGTorrentDLM"

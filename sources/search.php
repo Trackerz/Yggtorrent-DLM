@@ -13,25 +13,13 @@ class YGGTorrentDLM {
 
 	/**
 	 * @var int MAX_PAGES Nombres de pages maximum pour la recherche
-	 * L'application smartphone DS-GET affiche maximum 1000 résultats
-	 * 50 résultats par pages * 20 = 1000
 	 */
 	const MAX_PAGES = 20;
 
 	/**
-	 * @var string EXTENSION Extension du nom de domaine
+	 * @var string TWITTER_URL Url du twitter Yggtorrent
 	 */
-	const EXTENSION = 'ch';
-
-	/**
-	 * @var string BASE_URL Url de la page d'accueil
-	 */
-	const BASE_URL = 'https://www.yggtorrent.' . self::EXTENSION;
-	
-	/**
-	 * @var string PROXY_URL Url secondaire du site autre que l'accueil
-	 */
-	const PROXY_URL = 'https://www2.yggtorrent.' . self::EXTENSION;
+	const TWITTER_URL = 'https://twitter.com/yggtorrent_com';
 
 	/**
 	 * @var string DOWNLOAD_URL Url du fichier ygg.php
@@ -39,17 +27,17 @@ class YGGTorrentDLM {
 	const DOWNLOAD_URL = 'https://127.0.0.1/ygg.php?torrent={$1}&cookie={$2}';
 
 	/**
-	 * @var string SEARCH_URL Chemin permetant la recherche
+	 * @var string SEARCH_URL Chemin permettant la recherche
 	 */
 	const SEARCH_URL = '/engine/search?do=search&sort=publish_date&order=desc&name={$1}&page={$2}';
 
 	/**
-	 * @var string TORRENT_URL Chemin permetant de télécharge un .torrent
+	 * @var string TORRENT_URL Chemin permettant de télécharge un .torrent
 	 */
 	const TORRENT_URL = '/engine/download_torrent?id=';
 
 	/**
-	 * @var string AUTH_URL Chemin permetant la connexion
+	 * @var string AUTH_URL Chemin permettant la connexion
 	 */
 	const AUTH_URL = '/user/login';
 
@@ -57,11 +45,21 @@ class YGGTorrentDLM {
 	 * @var string COOKIE_FILE Emplacement du cookie
 	 */
 	const COOKIE_FILE = '/tmp/yggtorrent.cookie';
+	
+	/**
+	 * @var string BASE_URL Url de la page d'accueil
+	 */
+	private $baseUrl = 'https://www.';
+	
+	/**
+	 * @var string PROXY_URL Url secondaire du site
+	 */
+	private $proxyUrl = 'https://www2.';
     
     /**
-     * @var resource $dom Instance de DOMDocument
+     * @var resource $document Instance de DOMDocument
      */
-	private $dom;
+	private $document;
 	
     /**
      * @var resource $curl CURL
@@ -83,7 +81,7 @@ class YGGTorrentDLM {
      */
     public function __construct() {
 
-		$this->dom = new DOMDocument();
+		$this->document = new DOMDocument();
 
 		$this->categories = array(
 			// Audio
@@ -129,7 +127,7 @@ class YGGTorrentDLM {
 			2176 => 'Formation',
 			2177 => 'Application Autre',
 			
-			// Film/Video
+			// Film / Video
 			2178 => 'Animation',
 			2179 => 'Animation Série',
 			2180 => 'Concert',
@@ -152,11 +150,11 @@ class YGGTorrentDLM {
      * @param string $username Identifiant
      * @param string $password Mot de passe
      */
-    public function prepare($curl, $query, $username, $password) {		
+    public function prepare($curl, $query, $username, $password) {	
 
 		if ($this->VerifyAccount($username, $password)) {
 			$this->query = $query;	
-			$url = self::PROXY_URL . preg_replace(array('/{\$1}/', '/{\$2}/'), array(urlencode($this->query), 0), self::SEARCH_URL);
+			$url = $this->proxyUrl . preg_replace(array('/{\$1}/', '/{\$2}/'), array(urlencode($this->query), 0), self::SEARCH_URL);
 			$content = $this->CurlRequest($url, $curl);
 		}
     }
@@ -171,7 +169,7 @@ class YGGTorrentDLM {
     public function parse($plugin, $response) {
 
 		$totalPages = $this->GetTotalPages($response);
-		$this->ParseSearchContent($plugin, $response);
+		$this->ParseContent($plugin, $response);
 
 		if ($totalPages > 1) {
 			if ($totalPages > self::MAX_PAGES - 1)
@@ -182,9 +180,9 @@ class YGGTorrentDLM {
 
 			for ($i = 1; $i <= $totalPages; $i++) {
 				$this->curl = curl_init();				
-				$url = self::PROXY_URL . preg_replace(array('/{\$1}/', '/{\$2}/'), array(urlencode($this->query), $i * 50), self::SEARCH_URL);
+				$url = $this->proxyUrl . preg_replace(array('/{\$1}/', '/{\$2}/'), array(urlencode($this->query), $i * 50), self::SEARCH_URL);
 				$content = $this->CurlRequest($url);		
-				$this->ParseSearchContent($plugin, $content);
+				$this->ParseContent($plugin, $content);
 			}
 		}
 	}
@@ -199,7 +197,9 @@ class YGGTorrentDLM {
      */    
     public function VerifyAccount($username, $password) { 
 			
-		$this->DeleteCookie();
+		$this->DeleteCookie();		
+		
+		$this->GetDomain();
 
 		$data = array(
             'id' => urlencode($username),
@@ -208,28 +208,28 @@ class YGGTorrentDLM {
         
 		$this->curl = curl_init();		
 		curl_setopt($this->curl, CURLOPT_POSTFIELDS, $data);
-        $this->CurlRequest(self::BASE_URL . self::AUTH_URL);
+        $this->CurlRequest($this->baseUrl . self::AUTH_URL);
         
         $this->curl = curl_init();
-        $content = $this->CurlRequest(self::BASE_URL);
+        $content = $this->CurlRequest($this->baseUrl);
 		
-		@$this->dom->loadHTML('<?xml encoding="utf-8" ?>' . $content);
-		$finder = new DOMXpath($this->dom);
-		$ratio = $finder->query("//*[contains(@class, 'ico_upload')]");
+		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
+		$xpath = new DOMXpath($this->document);
+		$ratio = $xpath->query("//*[contains(@class, 'ico_upload')]");
 
         return $ratio->length > 0 ? true : false;
     }
 
     /**
-     * Parse la page de recherche
+     * Parse la page de recherche et récupére les informations des torrents
 	 * @param resource $plugin
      * @param string $content Page HTML
      */
-    private function ParseSearchContent($plugin, $content) {
+    private function ParseContent($plugin, $content) {
 
-		@$this->dom->loadHTML('<?xml encoding="utf-8" ?>' . $content);
+		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
 
-		$table = $this->dom->getElementsByTagName('table'); 
+		$table = $this->document->getElementsByTagName('table'); 
 		
 		if ($table->length > 1) {
 
@@ -241,19 +241,19 @@ class YGGTorrentDLM {
 				$item = $row->getElementsByTagName('td'); 
 				$a = $item->item(1)->getElementsByTagName('a');
 				$url = $a->item(0)->getAttribute('href');
-
+				
 				$torrentId = explode('/', $url);
 				$torrentId = explode('-', $torrentId[sizeof($torrentId) - 1])[0];
 
 				$torrent['category'] = $this->GetCategory($item->item(0)->nodeValue);
 				$torrent['name'] = $item->item(1)->nodeValue;
 				$torrent['url'] = $url;
-				$torrent['download'] = preg_replace(array('/{\$1}/', '/{\$2}/'), array(self::PROXY_URL . self::TORRENT_URL . $torrentId, self::COOKIE_FILE), self::DOWNLOAD_URL);
+				$torrent['download'] = preg_replace(array('/{\$1}/', '/{\$2}/'), array($this->proxyUrl . self::TORRENT_URL . $torrentId, self::COOKIE_FILE), self::DOWNLOAD_URL);
 				$torrent['hash'] = $torrentId;
 				$torrent['date'] = $this->GetDate($item->item(4)->nodeValue);
-				$torrent['size'] = floatval($this->GetSize($item->item(5)->nodeValue));
-				$torrent['seeder'] = intval($item->item(7)->nodeValue); 
-				$torrent['leecher'] = intval($item->item(8)->nodeValue);   
+				$torrent['size'] = $this->GetSize($item->item(5)->nodeValue);
+				$torrent['seeder'] = (int)$item->item(7)->nodeValue; 
+				$torrent['leecher'] = (int)$item->item(8)->nodeValue;   
 				
 				$this->AddTorrent($plugin, $torrent);
 			}	
@@ -279,88 +279,7 @@ class YGGTorrentDLM {
 			$torrent['category']
 		);
 	}
-
-	/**
-	 * Récupére la date en fonction du timestamp
-	 * @param string $time Timestamp
-	 * @return string Retourne la date au format 2019-01-01 01:00:00
-	 */
-	private function GetDate($time) {		
-
-		$timestamp = explode(' ', $time)[0];
-		$date = new DateTime();
-		$date->setTimestamp($timestamp);
-		$date = $date->format('Y-m-d H:i:s');
-
-		return $date;
-	}
-
-	/**
-	 * Récupére le nombre de pages de la recherche
-	 * @param string $page Page au format HTML
-	 * @return int Retourne le nombre de pages
-	 */
-	private function GetTotalPages($content) {
-
-		@$this->dom->loadHTML('<?xml encoding="utf-8" ?>' . $content); 
-
-		$h2 = $this->dom->getElementsByTagName('h2'); 
-
-		$total = explode(' ', $h2->item(1)->nodeValue);
-		$total = array_splice($total, 3);
-		$total = implode('', $total);
-		$total = ceil(intval($total) / 50);
-
-		return $total;
-	}
 	
-	/**
-	 * Récupére le nom de la categorie du torrent
-	 * @param string $id Identifiant de la categorie
-	 * @return string Retourne le nom de la categorie
-	 */
-	private function GetCategory($id) {
-
-		foreach ($this->categories as $catId => $catName) {
-			if ($catId === intval($id)) {
-				return $catName;
-			}
-		}
-
-		return 'Autre';
-	}
-
-	/**
-	 * Converti la taille en byte
-	 * @param string $size Taille du fichier depuis le site
-	 * @return float Retourne la taille en byte
-	 */
-	private function GetSize($size) {
-
-		$unit = substr($size, strlen($size) - 2, strlen($size));
-		$size = substr($size, 0, strlen($size) - 2);
-
-		switch ($unit) {
-			case 'To': 
-				$size = $size * 1024 * 1024 * 1024 * 1024; 
-				break;
-
-			case 'Go': 
-				$size = $size * 1024 * 1024 * 1024; 
-				break;
-
-			case 'Mo': 
-				$size = $size * 1024 * 1024; 
-				break;
-			
-			case 'ko': 
-				$size = $size * 1024;    
-				break;			
-		}
-		
-		return $size;
-	}
-
 	/**
 	 * Supprime le cookie
 	 */
@@ -398,5 +317,105 @@ class YGGTorrentDLM {
 		}
 
         return !isset($content) ? null : $content;
+	}
+
+	/**
+	 * Récupére le nom de domain actuel depuis Twitter
+	 */
+	private function GetDomain() {
+
+		$this->curl = curl_init();
+		$content = $this->CurlRequest(self::TWITTER_URL);
+
+		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
+		$xpath = new DOMXpath($this->document);
+
+		$domain = $xpath->query("//*[contains(@class, 'ProfileHeaderCard-urlText')]");
+		$domain = str_replace(' ', '', $domain[0]->textContent);
+		$domain = str_replace(PHP_EOL, '', $domain);
+		
+		$this->baseUrl = $this->baseUrl . $domain;
+		$this->proxyUrl = $this->proxyUrl . $domain; 
+	}
+
+	/**
+	 * Récupére la date en fonction du timestamp
+	 * @param string $time Timestamp
+	 * @return string Retourne la date au format 2019-01-01 01:00:00
+	 */
+	private function GetDate($time) {		
+
+		$timestamp = explode(' ', $time)[0];
+		$date = new DateTime();
+		$date->setTimestamp($timestamp);
+		$date = $date->format('Y-m-d H:i:s');
+
+		return $date;
+	}
+
+	/**
+	 * Récupére le nombre de pages de la recherche
+	 * @param string $content Page au format HTML
+	 * @return int Retourne le nombre de pages
+	 */
+	private function GetTotalPages($content) {
+
+		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content); 
+
+		$h2 = $this->document->getElementsByTagName('h2'); 
+
+		$total = explode(' ', $h2->item(1)->nodeValue);
+		$total = array_splice($total, 3);
+		$total = implode('', $total);
+		$total = ceil((int)$total / 50);
+
+		return $total;
+	}
+	
+	/**
+	 * Récupére le nom de la categorie du torrent
+	 * @param string $id Identifiant de la categorie
+	 * @return string Retourne le nom de la categorie
+	 */
+	private function GetCategory($id) {
+
+		foreach ($this->categories as $catId => $catName) {
+			if ($catId === (int)$id) {
+				return $catName;
+			}
+		}
+
+		return 'Autre';
+	}
+
+	/**
+	 * Converti la taille en byte
+	 * @param string $size Taille du fichier depuis le site
+	 * @return float Retourne la taille en byte
+	 */
+	private function GetSize($size) {
+
+		$unit = substr($size, strlen($size) - 2, strlen($size));
+		$size = substr($size, 0, strlen($size) - 2);
+
+		switch ($unit) {
+			case 'To': 
+				$size = $size * 1024 * 1024 * 1024 * 1024; 
+				break;
+
+			case 'Go': 
+				$size = $size * 1024 * 1024 * 1024; 
+				break;
+
+			case 'Mo': 
+				$size = $size * 1024 * 1024; 
+				break;
+			
+			case 'ko': 
+				$size = $size * 1024;    
+				break;			
+		}
+		
+		return (float)$size;
 	}
 }
