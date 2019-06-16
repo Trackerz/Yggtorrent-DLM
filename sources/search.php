@@ -57,7 +57,7 @@ class YGGTorrentDLM {
 	private $proxyUrl = 'https://www2.';
 	
 	/**
-	 * @var resource $document Instance de DOMDocument
+	 * @var DOMDocument $document Instance de DOMDocument
 	 */
 	private $document;
 
@@ -152,7 +152,7 @@ class YGGTorrentDLM {
 	 * @param string $password Mot de passe
 	 */
 	public function prepare($curl, $query, $username, $password) {	
-
+		
 		if ($this->VerifyAccount($username, $password)) {
 			$this->query = $query;	
 			$url = $this->proxyUrl . preg_replace(array('/{\$1}/', '/{\$2}/'), array(urlencode($this->query), 0), self::SEARCH_URL);
@@ -238,15 +238,17 @@ class YGGTorrentDLM {
 				$torrentId = explode('/', $url);
 				$torrentId = explode('-', $torrentId[sizeof($torrentId) - 1])[0];
 
-				$torrent['category'] = $this->GetCategory($item->item(0)->nodeValue);
-				$torrent['name'] = $item->item(1)->nodeValue;
-				$torrent['url'] = $url;
-				$torrent['download'] = preg_replace(array('/{\$1}/', '/{\$2}/'), array($this->proxyUrl . self::TORRENT_URL . $torrentId, self::COOKIE_FILE), self::DOWNLOAD_URL);
-				$torrent['hash'] = $torrentId;
-				$torrent['date'] = $this->GetDate($item->item(4)->nodeValue);
-				$torrent['size'] = $this->GetSize($item->item(5)->nodeValue);
-				$torrent['seeder'] = (int)$item->item(7)->nodeValue; 
-				$torrent['leecher'] = (int)$item->item(8)->nodeValue;   
+				$torrent = [
+					'category' => $this->GetCategory($item->item(0)->nodeValue),
+					'name' => $item->item(1)->nodeValue,
+					'url' => $url,
+					'download' => preg_replace(array('/{\$1}/', '/{\$2}/'), array($this->proxyUrl . self::TORRENT_URL . $torrentId, self::COOKIE_FILE), self::DOWNLOAD_URL),
+					'hash' => $torrentId,
+					'date' => $this->GetDate($item->item(4)->nodeValue),
+					'size' => (float)$this->GetSize($item->item(5)->nodeValue),
+					'seeder' => (int)$item->item(7)->nodeValue, 
+					'leecher' => (int)$item->item(8)->nodeValue
+				];
 				
 				$this->AddTorrent($plugin, $torrent);
 			}	
@@ -261,15 +263,15 @@ class YGGTorrentDLM {
 	private function AddTorrent($plugin, $torrent) {
 		
 		$plugin->addResult(
-			$torrent['name'], 
-			$torrent['download'], 
-			$torrent['size'], 
-			$torrent['date'],
-			$torrent['url'],
-			$torrent['hash'],
-			$torrent['seeder'],
-			$torrent['leecher'],
-			$torrent['category']
+			$torrent->name, 
+			$torrent->download, 
+			$torrent->size, 
+			$torrent->date,
+			$torrent->url,
+			$torrent->hash,
+			$torrent->seeder,
+			$torrent->leecher,
+			$torrent->category
 		);
 	}
 	
@@ -287,6 +289,7 @@ class YGGTorrentDLM {
 	 * Exécute la requête CURL
 	 * @param string $url URL de la page
 	 * @param resource $curl CURL
+	 * @param bool $prepare Identifie si curl est initialisé par synology ou non
 	 * @return string Retourne la page au format HTML
 	 */
 	private function CurlRequest($url, $curl = null, $prepare = false) {
@@ -316,7 +319,7 @@ class YGGTorrentDLM {
 	 * Récupére le nom de domain actuel depuis Twitter
 	 */
 	private function GetDomain() {
-
+		
 		$content = $this->CurlRequest(self::TWITTER_URL);
 
 		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
@@ -357,7 +360,7 @@ class YGGTorrentDLM {
 		$total = explode(' ', $h2->item(1)->nodeValue);
 		$total = array_splice($total, 3);
 		$total = implode('', $total);
-		$total = ceil((int)$total / 50);
+		$total = ceil($total / 50);
 
 		return $total;
 	}
