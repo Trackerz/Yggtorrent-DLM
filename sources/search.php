@@ -44,12 +44,12 @@ class YGGTorrentDLM {
 	/**
 	 * @var string COOKIE_FILE Emplacement du cookie
 	 */
-	const COOKIE_FILE = '/tmp/yggtorrent.cookie';
+	const COOKIE_FILE = '/tmp/yggtorrent.cookie1';
 	
 	/**
 	 * @var string $baseUrl Url de la page d'accueil
 	 */
-	private $baseUrl = 'https://www.';
+	private $baseUrl = 'https://www3.';
 	
 	/**
 	 * @var string $proxyUrl Url secondaire du site
@@ -156,7 +156,7 @@ class YGGTorrentDLM {
 		if ($this->VerifyAccount($username, $password)) {
 			$this->query = $query;	
 			$url = $this->proxyUrl . preg_replace(array('/{\$1}/', '/{\$2}/'), array(urlencode($this->query), 0), self::SEARCH_URL);
-			$this->CurlRequest($url, $curl, true);
+			return $this->CurlRequest($url, $curl, true);
 		}
 	}
 
@@ -240,7 +240,7 @@ class YGGTorrentDLM {
 
 				$torrent = [
 					'category' => $this->GetCategory($item->item(0)->nodeValue),
-					'name' => $item->item(1)->nodeValue,
+					'name' => trim(preg_replace('/\s+/', ' ', $item->item(1)->nodeValue)),
 					'url' => $url,
 					'download' => preg_replace(array('/{\$1}/', '/{\$2}/'), array($this->proxyUrl . self::TORRENT_URL . $torrentId, self::COOKIE_FILE), self::DOWNLOAD_URL),
 					'hash' => $torrentId,
@@ -261,17 +261,17 @@ class YGGTorrentDLM {
 	 * @param array $torrent Informations du torrent
 	 */
 	private function AddTorrent($plugin, $torrent) {
-		
+
 		$plugin->addResult(
-			$torrent->name, 
-			$torrent->download, 
-			$torrent->size, 
-			$torrent->date,
-			$torrent->url,
-			$torrent->hash,
-			$torrent->seeder,
-			$torrent->leecher,
-			$torrent->category
+			$torrent['name'], 
+			$torrent['download'], 
+			$torrent['size'], 
+			$torrent['date'],
+			$torrent['url'],
+			$torrent['hash'],
+			$torrent['seeder'],
+			$torrent['leecher'],
+			$torrent['category']
 		);
 	}
 	
