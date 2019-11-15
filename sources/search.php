@@ -44,12 +44,12 @@ class YGGTorrentDLM {
 	/**
 	 * @var string COOKIE_FILE Emplacement du cookie
 	 */
-	const COOKIE_FILE = '/tmp/yggtorrent.cookie1';
+	const COOKIE_FILE = '/tmp/yggtorrent.cookie';
 	
 	/**
 	 * @var string $baseUrl Url de la page d'accueil
 	 */
-	private $baseUrl = 'https://www3.';
+	private $baseUrl = 'https://www5.';
 	
 	/**
 	 * @var string $proxyUrl Url secondaire du site
