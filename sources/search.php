@@ -29,7 +29,7 @@ class YGGTorrentDLM {
 	/**
 	 * @var string SEARCH_URL Chemin permettant la recherche
 	 */
-	const SEARCH_URL = '/engine/search?do=search&sort=publish_date&order=desc&name={$1}&page={$2}';
+	const SEARCH_URL = '?do=search&sort=publish_date&order=desc&name={$1}&page={$2}';
 
 	/**
 	 * @var string TORRENT_URL Chemin permettant de télécharge un .torrent
@@ -49,12 +49,12 @@ class YGGTorrentDLM {
 	/**
 	 * @var string $baseUrl Url de la page d'accueil
 	 */
-	private $baseUrl = 'https://www5.';
+	private $baseUrl;
 	
 	/**
 	 * @var string $proxyUrl Url secondaire du site
 	 */
-	private $proxyUrl = 'https://www2.';
+	private $proxyUrl;
 	
 	/**
 	 * @var DOMDocument $document Instance de DOMDocument
@@ -316,20 +316,26 @@ class YGGTorrentDLM {
 	}
 
 	/**
-	 * Récupére le nom de domain actuel depuis Twitter
+	 * Récupére le nom de domaine et sous-domaine
 	 */
-	private function GetDomain() {
+	public function GetDomain() {
 		
 		$content = $this->CurlRequest(self::TWITTER_URL);
-
 		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
 		$xpath = new DOMXpath($this->document);
 
 		$domain = $xpath->query("//*[contains(@class, 'ProfileHeaderCard-urlText')]");
 		$domain = str_replace(array(' ', PHP_EOL), array('', ''), $domain[0]->textContent);
 		
-		$this->baseUrl = $this->baseUrl . $domain;
-		$this->proxyUrl = $this->proxyUrl . $domain; 
+		$content = $this->CurlRequest($domain);
+		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
+		$xpath = new DOMXpath($this->document);
+
+		$domainLogin = $xpath->query("//*[contains(@class, 'logotype')]");
+		$domainSearch = $xpath->query("//*[contains(@class, 'search')]");
+		
+		$this->baseUrl = $domainLogin[0]->attributes[0]->nextSibling->value;
+		$this->proxyUrl = $domainSearch[0]->attributes[0]->nextSibling->value;
 	}
 
 	/**
