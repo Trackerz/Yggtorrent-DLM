@@ -15,11 +15,12 @@ $count = $ygg->parse($plugin, $response);
 echo 'TOTAL : ' . $plugin->Count() . "\n";
 var_dump($plugin->results);
 
-class Plugin 
-{
+class Plugin {
+    
     public $results;
 
     public function AddResult($title, $download, $size, $datetime, $page, $hash, $seeds, $leechs, $category) {
+        
         $this->results[] = array(
             'tite' => $title,
             'download' => $download,
