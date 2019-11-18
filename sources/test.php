@@ -12,13 +12,14 @@ curl_close($curl);
 $plugin = new Plugin();
 $count = $ygg->parse($plugin, $response);
 
-echo 'TOTAL : ' . $plugin->count() . "\n";
+echo 'TOTAL : ' . $plugin->Count() . "\n";
+var_dump($plugin->results);
 
 class Plugin 
 {
-    private $results;
+    public $results;
 
-    public function addResult($title, $download, $size, $datetime, $page, $hash, $seeds, $leechs, $category) {
+    public function AddResult($title, $download, $size, $datetime, $page, $hash, $seeds, $leechs, $category) {
         $this->results[] = array(
             'tite' => $title,
             'download' => $download,
@@ -32,7 +33,7 @@ class Plugin
         );
     }
 
-    public function count() {        
+    public function Count() {        
         return count($this->results);
     }
 }
