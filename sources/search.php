@@ -47,14 +47,19 @@ class YGGTorrentDLM {
 	const COOKIE = '/tmp/yggtorrent.cookie';
 	
 	/**
-	 * @var string $baseUrl Url de la page d'accueil
+	 * @var string $domain Nom de domaine
 	 */
-	private $baseUrl;
+	private $domain;
 	
 	/**
-	 * @var string $searchUrl Url secondaire du site
+	 * @var string $subDomainBase sous domaine de base
 	 */
-	private $searchUrl;
+	private $subDomainBase;
+	
+	/**
+	 * @var string $subDomainSearch Sous domaine de recherche
+	 */
+	private $subDomainSearch;
 	
 	/**
 	 * @var DOMDocument $document Instance de DOMDocument
@@ -155,7 +160,7 @@ class YGGTorrentDLM {
 		
 		if ($this->VerifyAccount($username, $password)) {
 			$this->query = $query;	
-			$url = $this->searchUrl . preg_replace(array('/{\$1}/', '/{\$2}/'), array(urlencode($this->query), 0), self::SEARCH_PATH);
+			$url = $this->subDomainSearch . $this->domain . preg_replace(array('/{\$1}/', '/{\$2}/'), array(urlencode($this->query), 0), self::SEARCH_PATH);
 			return $this->Request($url, $curl, true);
 		}
 	}
@@ -180,7 +185,7 @@ class YGGTorrentDLM {
 				$totalPages--;
 
 			for ($i = 1; $i <= $totalPages; $i++) {
-				$url = $this->searchUrl . preg_replace(array('/{\$1}/', '/{\$2}/'), array(urlencode($this->query), $i * 50), self::SEARCH_PATH);
+				$url = $this->subDomainSearch . $this->domain . preg_replace(array('/{\$1}/', '/{\$2}/'), array(urlencode($this->query), $i * 50), self::SEARCH_PATH);
 				$content = $this->Request($url);		
 				$this->ParseContent($plugin, $content);
 			}
@@ -202,9 +207,9 @@ class YGGTorrentDLM {
 		
 		$curl = curl_init();		
 		curl_setopt($curl, CURLOPT_POSTFIELDS, array('id' => urlencode($username), 'pass' => urlencode($password)));
-		$this->Request($this->baseUrl . self::AUTH_PATH, $curl);
+		$this->Request($this->subDomainBase . $this->domain . self::AUTH_PATH, $curl);
 		
-		$content = $this->Request($this->baseUrl);
+		$content = $this->Request($this->subDomainBase . $this->domain);
 				
 		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
 		$xpath = new DOMXpath($this->document);
@@ -242,7 +247,7 @@ class YGGTorrentDLM {
 					'category' => $this->GetCategory($item->item(0)->nodeValue),
 					'name' => trim(preg_replace('/\s+/', ' ', $item->item(1)->nodeValue)),
 					'url' => $url,
-					'download' => preg_replace(array('/{\$1}/', '/{\$2}/'), array($this->searchUrl . self::TORRENT_PATH . $torrentId, self::COOKIE), self::DOWNLOAD_URL),
+					'download' => preg_replace(array('/{\$1}/', '/{\$2}/'), array($this->subDomainSearch . $this->domain . self::TORRENT_PATH . $torrentId, self::COOKIE), self::DOWNLOAD_URL),
 					'hash' => $torrentId,
 					'date' => $this->GetDate($item->item(4)->nodeValue),
 					'size' => (float)$this->GetSize($item->item(5)->nodeValue),
@@ -316,7 +321,7 @@ class YGGTorrentDLM {
 	}
 
 	/**
-	 * Récupére le nom de domaine et sous-domaine
+	 * Récupére le nom de domaine
 	 */
 	private function GetDomain() {
 		
@@ -324,21 +329,28 @@ class YGGTorrentDLM {
 		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
 		$xpath = new DOMXpath($this->document);
 
-		$domain = $xpath->query("//*[contains(@class, 'ProfileHeaderCard-urlText')]");
-		$domain = str_replace(array(' ', PHP_EOL), array('', ''), $domain[0]->textContent);
-		
-		$content = $this->Request($domain);
+		$this->domain = $xpath->query("//*[contains(@class, 'ProfileHeaderCard-urlText')]");
+		$this->domain = str_replace(array(' ', PHP_EOL), array('', ''), $this->domain[0]->textContent);
+
+		$this->GetSubDomain();
+	}
+
+	/**
+	 * Récupére les sous-domaine
+	 */
+	private function GetSubDomain() {
+				
+		$content = $this->Request($this->domain);
 		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
 		$xpath = new DOMXpath($this->document);
 
-		$domainLogin = $xpath->query("//*[contains(@class, 'logotype')]");
-		$domainSearch = $xpath->query("//*[contains(@class, 'search')]");
+		$this->subDomainBase = $xpath->query("//*[contains(@class, 'logotype')]");		
+		$this->subDomainBase = explode('/', $this->subDomainBase[0]->attributes[0]->nextSibling->value)[2];
+		$this->subDomainBase = 'https://' . explode('.', $this->subDomainBase)[0] . '.';
 		
-		$this->baseUrl = $domainLogin[0]->attributes[0]->nextSibling->value;
-
-		$this->searchUrl = explode('/', $domainSearch[0]->attributes[0]->nextSibling->value);
-		$this->searchUrl = array_splice($this->searchUrl, 0, 3);
-		$this->searchUrl = implode('/', $this->searchUrl);
+		$this->subDomainSearch = $xpath->query("//*[contains(@class, 'search')]");
+		$this->subDomainSearch = explode('/', $this->subDomainSearch[0]->attributes[0]->nextSibling->value)[2];
+		$this->subDomainSearch = 'https://' . explode('.', $this->subDomainSearch)[0] . '.';
 	}
 
 	/**
