@@ -5,7 +5,7 @@ Permet de rechercher et de télécharger des torrents du site **YggTorrent** dir
 La recherche est limitée à **1000** résultats ce qui représente **20 pages** sur le site.  
 Cette limitation est faite pour l'application mobile qui ne peut pas afficher plus de résultats.
 
-Version à jour pour [yggtorrent.ch](https://www.yggtorrent.ch/)
+Version à jour pour [yggtorrent.sw](https://www.yggtorrent.sw/)
 
 # Installation :  
 
