@@ -325,12 +325,16 @@ class YGGTorrentDLM {
 	 */
 	private function GetDomain() {
 		
+		/*
 		$content = $this->Request(self::TWITTER_URL);
 		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
 		$xpath = new DOMXpath($this->document);
 
 		$this->domain = $xpath->query("//*[contains(@class, 'ProfileHeaderCard-urlText')]");
 		$this->domain = str_replace(array(' ', PHP_EOL), array('', ''), $this->domain[0]->textContent);
+		*/
+
+		$this->domain = 'yggtorrent.se';
 
 		$this->GetSubDomain();
 	}
