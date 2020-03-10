@@ -18,7 +18,7 @@ Version à jour pour [yggtorrent.se](https://www.yggtorrent.se/)
   - Une fois ajouté il faut sélectionner le plugin puis cliquer sur **Modifier** et entrer les identifiants du site puis faire **Vérifier**.  
   - Un message indique que la **connexion est réussie**
 
-# Compilation : 
+# Compilation (facultatif) : 
 
 - **Linux** : Commande > tar zcf mymodule.dlm INFO search.php
 
