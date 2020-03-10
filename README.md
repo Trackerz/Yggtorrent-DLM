@@ -3,7 +3,7 @@
 Permet de rechercher et de télécharger des torrents sur **YGGTorrent** directement depuis un **NAS Synology** via l'application **DownloadStation** ou bien sur mobile via **DS-GET**
 
 La recherche est limitée à **1000** résultats ce qui représente **20 pages** sur le site  
-Cette limitation est faite pour l'application mobile qui ne peut pas afficher plus de résultats
+Cette limitation est faite pour l'application mobile **DS-GET** qui ne peut pas afficher plus de résultats
 
 La récupération du nom de domaine se fait automatiquement depuis [Mastodon](https://mamot.fr/@YggTorrent) ce qui évite de mettre à jour le code si un changement de domaine est effectué
 
