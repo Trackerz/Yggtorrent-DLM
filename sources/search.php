@@ -16,7 +16,7 @@ class YGGTorrentDLM {
 	const MAX_PAGES = 20;
 
 	/**
-	 * @var string TWITTER_URL Url du twitter Yggtorrent
+	 * @var string MASTODON_URL Url du twitter Yggtorrent
 	 */
 	const MASTODON_URL = 'https://mamot.fr/@YggTorrent';
 
