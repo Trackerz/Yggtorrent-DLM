@@ -5,7 +5,7 @@ Permet de rechercher et de télécharger des torrents sur **YGGTorrent** directe
 La recherche est limitée à **1000** résultats ce qui représente **20 pages** sur le site.  
 Cette limitation est faite pour l'application mobile qui ne peut pas afficher plus de résultats.
 
-Version à jour pour [yggtorrent.ws](https://www.yggtorrent.ws/)
+Version à jour pour [yggtorrent.se](https://www.yggtorrent.se/)
 
 # Installation :  
 
