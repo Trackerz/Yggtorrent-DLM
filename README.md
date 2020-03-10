@@ -16,7 +16,7 @@ Version fonctionnelle pour [yggtorrent.se](https://www.yggtorrent.se/)
   - Dans WebStation > Paramètres PHP > Modifier > Cocher l'extension **CURL**
 - Placer le fichier **ygg.php** à la racine du dossier web
 - Ouvrir **DownloadStation** 
-  - Aller dans **Paramétres > Recherche BT > Ajouter** et ouvrir le fichier **yggtorrent.ch.dlm** puis valider
+  - Aller dans **Paramétres > Recherche BT > Ajouter** et ouvrir le fichier **yggtorrent.dlm** puis valider
   - Une fois ajouté il faut sélectionner le plugin puis cliquer sur **Modifier** et entrer les identifiants du site puis faire **Vérifier**.  
   - Un message indique que la **connexion est réussie**
 
