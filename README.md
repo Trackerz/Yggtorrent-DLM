@@ -1,11 +1,11 @@
 # Yggtorrent-DLM
 
-Permet de rechercher et de télécharger des torrents du site **YggTorrent** directement depuis un **NAS Synology** via l'application **DownloadStation** ou bien sur mobile via **DS-GET**
+Permet de rechercher et de télécharger des torrents sur **YGGTorrent** directement depuis un **NAS Synology** via l'application **DownloadStation** ou bien sur mobile via **DS-GET**
 
 La recherche est limitée à **1000** résultats ce qui représente **20 pages** sur le site.  
 Cette limitation est faite pour l'application mobile qui ne peut pas afficher plus de résultats.
 
-Version à jour pour [yggtorrent.ws](https://www.yggtorrent.ws/)
+Version à jour pour [yggtorrent.se](https://www.yggtorrent.se/)
 
 # Installation :  
 
