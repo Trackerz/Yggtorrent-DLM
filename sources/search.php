@@ -149,7 +149,7 @@ class YGGTorrentDLM {
 	/**
 	 * Synology
 	 * 
-	 * Rrecherche les résultats de la requête sur le site
+	 * Execute la requête de recherche
 	 * @param resource $curl CURL
 	 * @param string $query Recherche de l'utilisateur
 	 * @param string $username Identifiant
