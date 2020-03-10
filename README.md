@@ -5,7 +5,7 @@ Permet de rechercher et de télécharger des torrents sur **YGGTorrent** directe
 La recherche est limitée à **1000** résultats ce qui représente **20 pages** sur le site.  
 Cette limitation est faite pour l'application mobile qui ne peut pas afficher plus de résultats.
 
-La récupération du nom de domaine se fait automatiquement depuis [mastodon](https://mamot.fr/@YggTorrent) ce qui évite de mettre à jour le code si un changement de domaine est effectué
+La récupération du nom de domaine se fait automatiquement depuis [Mastodon](https://mamot.fr/@YggTorrent) ce qui évite de mettre à jour le code si un changement de domaine est effectué
 
 Version fonctionnelle pour [yggtorrent.se](https://www.yggtorrent.se/)
 
