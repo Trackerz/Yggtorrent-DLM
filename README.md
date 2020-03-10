@@ -5,11 +5,12 @@ Permet de rechercher et de télécharger des torrents sur **YGGTorrent** directe
 La recherche est limitée à **1000** résultats ce qui représente **20 pages** sur le site.  
 Cette limitation est faite pour l'application mobile qui ne peut pas afficher plus de résultats.
 
+La récupération du nom de domaine se fait automatiquement depuis [mastodon](https://mamot.fr/@YggTorrent) ce qui évite de mettre à jour le code si un changement de domaine est effectué
+
 Version à jour pour [yggtorrent.se](https://www.yggtorrent.se/)
 
 # Installation :  
 
-- Avoir un compte **ACTIF** sur le site
 - Installer **WebStation**
 - Installer **PHP** (activer CURL dans les options)
 - Placer le fichier **ygg.php** à la racine du dossier web
