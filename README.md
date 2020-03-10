@@ -7,7 +7,7 @@ Cette limitation est faite pour l'application mobile qui ne peut pas afficher pl
 
 La récupération du nom de domaine se fait automatiquement depuis [mastodon](https://mamot.fr/@YggTorrent) ce qui évite de mettre à jour le code si un changement de domaine est effectué
 
-Version à jour pour [yggtorrent.se](https://www.yggtorrent.se/)
+Version fonctionnelle pour [yggtorrent.se](https://www.yggtorrent.se/)
 
 # Installation :  
 
