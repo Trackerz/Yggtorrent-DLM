@@ -3,7 +3,7 @@
  * YGGTorrentDLM
  * 
  * Parse les résultats de la recherche utilisateur du site YGGTorrent
- * et les affichent dans DownloadStation ce qui permet de visualiser et téléchagrer directement 
+ * et les affiche dans DownloadStation ce qui permet de visualiser et téléchagrer directement 
  * un torrent depuis le NAS sans jamais passer par le site
  * 
  */
