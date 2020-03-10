@@ -48,7 +48,7 @@ class Plugin {
         );
     }
 
-    public function Total() {        
+    public function Total() {                
         return count($this->results);
     }
 }

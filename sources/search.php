@@ -3,10 +3,9 @@
  * YGGTorrentDLM
  * 
  * Parse les résultats de la recherche utilisateur du site YGGTorrent
- * et les affiches dans DownloadStation ce qui permet de visualiser et téléchagrer directement 
+ * et les affichent dans DownloadStation ce qui permet de visualiser et téléchagrer directement 
  * un torrent depuis le NAS sans jamais passer par le site
  * 
- * /!\ Un compte ACTIF avec un ratio supérieur ou égal à 1 est requis /!\
  */
 
 class YGGTorrentDLM {
@@ -19,7 +18,7 @@ class YGGTorrentDLM {
 	/**
 	 * @var string TWITTER_URL Url du twitter Yggtorrent
 	 */
-	const TWITTER_URL = 'https://twitter.com/yggtorrent_com';
+	const MASTODON_URL = 'https://mamot.fr/@YggTorrent';
 
 	/**
 	 * @var string DOWNLOAD_URL Url du fichier ygg.php
@@ -324,17 +323,16 @@ class YGGTorrentDLM {
 	 * Récupére le nom de domaine
 	 */
 	private function GetDomain() {
-		
-		/*
-		$content = $this->Request(self::TWITTER_URL);
+				
+		$content = $this->Request(self::MASTODON_URL);
 		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
 		$xpath = new DOMXpath($this->document);
 
-		$this->domain = $xpath->query("//*[contains(@class, 'ProfileHeaderCard-urlText')]");
-		$this->domain = str_replace(array(' ', PHP_EOL), array('', ''), $this->domain[0]->textContent);
-		*/
-
-		$this->domain = 'yggtorrent.se';
+		$this->domain = $xpath->query("//*[contains(@class, 'account__header__fields')]");
+		$this->domain = str_replace(array(' ', '/', PHP_EOL), array('', '', ''), $this->domain[0]->textContent);
+		$this->domain = explode('.', $this->domain);
+		array_shift($this->domain);
+		$this->domain = implode('.', $this->domain);
 
 		$this->GetSubDomain();
 	}
@@ -384,7 +382,7 @@ class YGGTorrentDLM {
 
 		$total = explode(' ', $h2->item(1)->nodeValue);
 		$total = array_splice($total, 3);
-		$total = implode('', $total);
+		$total = (float)implode('', $total);
 		$total = ceil($total / 50);
 
 		return $total;

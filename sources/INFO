@@ -2,9 +2,9 @@
     "name": "YGGTorrent",
     "displayname": "YGGTorrent",
     "description": "YGGTorrent Tracker privé",
-    "version": "1.1.4",
+    "version": "1.1.6",
     "accountsupport": true,
-    "site": "https://yggtorrent.pe/",
+    "site": "https://yggtorrent.se/",
     "module": "search.php",
     "type": "search",
     "class": "YGGTorrentDLM"
