@@ -7,7 +7,7 @@ Cette limitation est faite pour l'application mobile **DS-GET** qui ne peut pas 
 
 La récupération du nom de domaine se fait automatiquement depuis [Mastodon](https://mamot.fr/@YggTorrent) ce qui évite de mettre à jour le code si un changement de domaine est effectué
 
-Version fonctionnelle pour [yggtorrent.se](https://www.yggtorrent.se/)
+Version fonctionnelle pour [yggtorrent.se](https://yggtorrent.se/)
 
 # Installation :  
 
