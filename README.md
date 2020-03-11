@@ -24,7 +24,7 @@ Version fonctionnelle pour [yggtorrent.se](https://yggtorrent.se/)
 
 Cette partie est necessaire uniquement si vous souhaitez modifier le code vous meme et le recompiler
 
-- **Linux** : Commande > tar zcf mymodule.dlm INFO search.php
+- **Linux** : Commande > tar zcf yggtorrent.dlm INFO search.php
 
 - **Windows** (non testé) : [Voir ce lien](https://superuser.com/questions/244703/how-can-i-run-the-tar-czf-command-in-windows) 
 
