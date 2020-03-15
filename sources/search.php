@@ -16,7 +16,7 @@ class YGGTorrentDLM {
 	const MAX_PAGES = 20;
 
 	/**
-	 * @var string TWITTER_URL Url du twitter Yggtorrent
+	 * @var string MASTODON_URL Url du twitter Yggtorrent
 	 */
 	const MASTODON_URL = 'https://mamot.fr/@YggTorrent';
 
@@ -149,7 +149,7 @@ class YGGTorrentDLM {
 	/**
 	 * Synology
 	 * 
-	 * Rrecherche les résultats de la requête sur le site
+	 * Execute la requête de recherche
 	 * @param resource $curl CURL
 	 * @param string $query Recherche de l'utilisateur
 	 * @param string $username Identifiant
@@ -249,7 +249,7 @@ class YGGTorrentDLM {
 					'download' => preg_replace(array('/{\$1}/', '/{\$2}/'), array($this->subDomainSearch . $this->domain . self::TORRENT_PATH . $torrentId, self::COOKIE), self::DOWNLOAD_URL),
 					'hash' => $torrentId,
 					'date' => $this->GetDate($item->item(4)->nodeValue),
-					'size' => (float)$this->GetSize($item->item(5)->nodeValue),
+					'size' => $this->GetSize($item->item(5)->nodeValue),
 					'seeder' => (int)$item->item(7)->nodeValue, 
 					'leecher' => (int)$item->item(8)->nodeValue
 				];
@@ -364,9 +364,8 @@ class YGGTorrentDLM {
 
 		$timestamp = explode(' ', $time)[0];
 		$date = new DateTime();
-		$date->setTimestamp($timestamp);
 		
-		return $date->format('Y-m-d H:i:s');
+		return $date->setTimestamp($timestamp)->format('Y-m-d H:i:s');
 	}
 
 	/**
@@ -382,8 +381,8 @@ class YGGTorrentDLM {
 
 		$total = explode(' ', $h2->item(1)->nodeValue);
 		$total = array_splice($total, 3);
-		$total = (float)implode('', $total);
-		$total = ceil($total / 50);
+		$total = implode('', $total);
+		$total = ceil((float)$total / 50);
 
 		return $total;
 	}
