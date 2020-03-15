@@ -1,4 +1,4 @@
-# Yggtorrent-DLM
+# YGGTorrent-DLM
 
 Permet de rechercher et de télécharger des torrents sur **YGGTorrent** directement depuis un **NAS Synology** via **DownloadStation** ou bien sur mobile via l'application **DS-GET**
 
