@@ -13,7 +13,7 @@ Version fonctionnelle pour [yggtorrent.se](https://yggtorrent.se/)
 
 - Installer **WebStation**
 - Installer **PHP** (activer CURL dans les options)
-  - Dans WebStation > Paramètres PHP > Modifier > Cocher l'extension **CURL**
+  - Dans **WebStation > Paramètres PHP > Modifier** et Cocher l'extension **CURL**
 - Placer le fichier **ygg.php** à la racine du dossier web
 - Ouvrir **DownloadStation** 
   - Aller dans **Paramétres > Recherche BT > Ajouter** et ouvrir le fichier **yggtorrent.dlm** puis valider
