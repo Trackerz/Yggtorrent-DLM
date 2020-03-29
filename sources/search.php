@@ -16,9 +16,14 @@ class YGGTorrentDLM {
 	const MAX_PAGES = 20;
 
 	/**
-	 * @var string MASTODON_URL Url du twitter Yggtorrent
+	 * @var string MASTODON_URL Url du mastodon Yggtorrent
 	 */
 	const MASTODON_URL = 'https://mamot.fr/@YggTorrent';
+
+	/**
+	 * @var string TWITTER_URL Url du twitter Yggtorrent
+	 */
+	const TWITTER_URL = 'https://twitter.com/yggtorrent_p2p';
 
 	/**
 	 * @var string DOWNLOAD_URL Url du fichier ygg.php
@@ -202,7 +207,13 @@ class YGGTorrentDLM {
 	public function VerifyAccount($username, $password) { 
 			
 		$this->DeleteCookie();
-		$this->GetDomain();
+		$this->GetDomainFromTwitter();
+
+		if(empty($this->domain)) {
+			$this->GetDomainFromMastodon();
+		}
+
+		$this->GetSubDomain();
 		
 		$curl = curl_init();		
 		curl_setopt($curl, CURLOPT_POSTFIELDS, array('id' => urlencode($username), 'pass' => urlencode($password)));
@@ -320,9 +331,9 @@ class YGGTorrentDLM {
 	}
 
 	/**
-	 * Récupére le nom de domaine
+	 * Récupére le nom de domaine depuis Mastodon
 	 */
-	private function GetDomain() {
+	private function GetDomainFromMastodon() {
 				
 		$content = $this->Request(self::MASTODON_URL);
 		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
@@ -333,8 +344,19 @@ class YGGTorrentDLM {
 		$this->domain = explode('.', $this->domain);
 		array_shift($this->domain);
 		$this->domain = implode('.', $this->domain);
+	}
 
-		$this->GetSubDomain();
+	/**
+	 * Récupére le nom de domaine depuis Twitter
+	 */
+	private function GetDomainFromTwitter() {
+		
+		$content = $this->Request(self::TWITTER_URL);
+		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
+		$xpath = new DOMXpath($this->document);
+
+		$this->domain = $xpath->query("//*[contains(@class, 'ProfileHeaderCard-urlText')]");
+		$this->domain = str_replace(array(' ', PHP_EOL), array('', ''), $this->domain[0]->textContent);
 	}
 
 	/**
