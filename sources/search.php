@@ -1,39 +1,39 @@
 <?php
+
 /**
- * YGGTorrentDLM
+ * YggTorrentDLM
  * 
- * Parse les résultats de la recherche utilisateur du site YGGTorrent
- * et les affiche dans DownloadStation ce qui permet de visualiser et téléchagrer directement 
+ * Parse les résultats de la recherche de l'utilisateur sur le site YGGTorrent
+ * et les affiches dans DownloadStation ce qui permet de visualiser et téléchagrer directement 
  * un torrent depuis le NAS sans jamais passer par le site
- * 
  */
 
-class YGGTorrentDLM {
-
+class YggTorrentDLM
+{
 	/**
-	 * @var int MAX_PAGES Nombres de pages maximum pour la recherche
+	 * @var int $max_pages Nombres de pages maximum pour la recherche
 	 */
-	const MAX_PAGES = 20;
+	const MAX_PAGE = 20;
 
 	/**
-	 * @var string MASTODON_URL Url du mastodon Yggtorrent
+	 * @var string MASTODON_URL Url Mastodon Yggtorrent
 	 */
 	const MASTODON_URL = 'https://mamot.fr/@YggTorrent';
 
 	/**
-	 * @var string TWITTER_URL Url du twitter Yggtorrent
+	 * @var string TWITTER_URL Url Twitter Yggtorrent
 	 */
 	const TWITTER_URL = 'https://twitter.com/yggtorrent_p2p';
 
 	/**
 	 * @var string DOWNLOAD_URL Url du fichier ygg.php
 	 */
-	const DOWNLOAD_URL = 'https://127.0.0.1/ygg.php?torrent={$1}&cookie={$2}';
+	const DOWNLOAD_URL = 'https://127.0.0.1/ygg.php?torrent={$1}';
 
 	/**
-	 * @var string SEARCH_PATH Chemin permettant la recherche
+	 * @var string CF_BYPASS Url du fichier cfbypass.php
 	 */
-	const SEARCH_PATH = '/engine/search?do=search&sort=publish_date&order=desc&name={$1}&page={$2}';
+	const CLOUDFLARE_BYPASS = 'https://127.0.0.1/cfbypass.php?query={$1}&domain={$2}&page={$3}';
 
 	/**
 	 * @var string TORRENT_PATH Chemin permettant de télécharge un .torrent
@@ -48,23 +48,23 @@ class YGGTorrentDLM {
 	/**
 	 * @var string COOKIE_FILE Emplacement du cookie
 	 */
-	const COOKIE = '/tmp/yggtorrent.cookie';
-	
+	const COOKIE_YGG = '/tmp/yggtorrent.cookie';
+
 	/**
 	 * @var string $domain Nom de domaine
 	 */
 	private $domain;
-	
+
 	/**
 	 * @var string $subDomainBase sous domaine de base
 	 */
 	private $subDomainBase;
-	
+
 	/**
 	 * @var string $subDomainSearch Sous domaine de recherche
 	 */
 	private $subDomainSearch;
-	
+
 	/**
 	 * @var DOMDocument $document Instance de DOMDocument
 	 */
@@ -80,15 +80,12 @@ class YGGTorrentDLM {
 	 */
 	private $query;
 
-	/**
-	 * Constructeur de la classe
-	 */
-	public function __construct() {
-
+	public function __construct()
+	{
 		$this->document = new DOMDocument();
 
 		$this->categories = array(
-			
+
 			// Audio
 			2147 => 'Karaoke',
 			2148 => 'Musique',
@@ -106,7 +103,7 @@ class YGGTorrentDLM {
 			// Emulation
 			2157 => 'Emulateurs',
 			2158 => 'Roms',
-			
+
 			// Jeux
 			2159 => 'Linux',
 			2160 => 'MacOS',
@@ -131,7 +128,7 @@ class YGGTorrentDLM {
 			2175 => 'Tablette',
 			2176 => 'Formation',
 			2177 => 'Application Autre',
-			
+
 			// Film / Video
 			2178 => 'Animation',
 			2179 => 'Animation Série',
@@ -144,13 +141,13 @@ class YGGTorrentDLM {
 			2186 => 'Sport',
 			2187 => 'Vidéo-clips',
 
-			// Adulte
+			// Adulte (FAP FAP FAP)
 			2189 => 'Film',
 			2190 => 'Hentai',
 			2191 => 'Image'
 		);
-	}    
-	
+	}
+
 	/**
 	 * Synology
 	 * 
@@ -160,11 +157,17 @@ class YGGTorrentDLM {
 	 * @param string $username Identifiant
 	 * @param string $password Mot de passe
 	 */
-	public function prepare($curl, $query, $username, $password) {	
-		
-		if ($this->VerifyAccount($username, $password)) {
-			$this->query = $query;	
-			$url = $this->subDomainSearch . $this->domain . preg_replace(array('/{\$1}/', '/{\$2}/'), array(urlencode($this->query), 0), self::SEARCH_PATH);
+	public function prepare($curl, $query, $username, $password)
+	{
+		if ($this->VerifyAccount($username, $password)) 
+		{
+			$this->query = $query;
+			$url = preg_replace(
+				array('/{\$1}/', '/{\$2}/', '/{\$3}/'),
+				array(urlencode($this->query), $this->subDomainSearch . $this->domain, 0),
+				self::CLOUDFLARE_BYPASS
+			);
+
 			return $this->Request($url, $curl, true);
 		}
 	}
@@ -176,21 +179,25 @@ class YGGTorrentDLM {
 	 * @param resource $plugin
 	 * @param string $response Page au format HTML
 	 */
-	public function parse($plugin, $response) {
-
+	public function parse($plugin, $response)
+	{
 		$totalPages = $this->GetTotalPages($response);
 		$this->ParseContent($plugin, $response);
 
-		if ($totalPages > 1) {
-			if ($totalPages > self::MAX_PAGES - 1)
-				$totalPages = self::MAX_PAGES - 1;
+		if ($totalPages > 1) 
+		{
+			$totalPages = $totalPages > self::MAX_PAGE - 1 ? self::MAX_PAGE - 1 : $totalPages;
 
-			if ($totalPages < self::MAX_PAGES - 1)
-				$totalPages--;
+			for ($i = 1; $i <= $totalPages; $i++) 
+			{
+				$url = preg_replace(
+					array('/{\$1}/', '/{\$2}/', '/{\$3}/'),
+					array(urlencode($this->query), $this->subDomainSearch . $this->domain, $i * 50),
+					self::CLOUDFLARE_BYPASS
+				);
 
-			for ($i = 1; $i <= $totalPages; $i++) {
-				$url = $this->subDomainSearch . $this->domain . preg_replace(array('/{\$1}/', '/{\$2}/'), array(urlencode($this->query), $i * 50), self::SEARCH_PATH);
-				$content = $this->Request($url);		
+				$content = $this->Request($url, null, false);
+
 				$this->ParseContent($plugin, $content);
 			}
 		}
@@ -203,24 +210,23 @@ class YGGTorrentDLM {
 	 * @param string $username Identifiant
 	 * @param string $password Mot de passe
 	 * @return bool Retourne TRUE si la connexion fonctionne sinon FALSE
-	 */    
-	public function VerifyAccount($username, $password) { 
-			
+	 */
+	public function VerifyAccount($username, $password)
+	{
 		$this->DeleteCookie();
 		$this->GetDomainFromTwitter();
 
-		if(empty($this->domain)) {
+		if (empty($this->domain))
 			$this->GetDomainFromMastodon();
-		}
 
 		$this->GetSubDomain();
-		
-		$curl = curl_init();		
+
+		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_POSTFIELDS, array('id' => urlencode($username), 'pass' => urlencode($password)));
 		$this->Request($this->subDomainBase . $this->domain . self::AUTH_PATH, $curl);
-		
+
 		$content = $this->Request($this->subDomainBase . $this->domain);
-				
+
 		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
 		$xpath = new DOMXpath($this->document);
 		$ratio = $xpath->query("//*[contains(@class, 'ico_upload')]");
@@ -233,23 +239,23 @@ class YGGTorrentDLM {
 	 * @param resource $plugin
 	 * @param string $content Page HTML
 	 */
-	private function ParseContent($plugin, $content) {
-
+	private function ParseContent($plugin, $content)
+	{
 		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
 
-		$table = $this->document->getElementsByTagName('table'); 
-		
-		if ($table->length > 1) {
+		$table = $this->document->getElementsByTagName('table');
 
+		if ($table->length > 1) 
+		{
 			$tbody = $table->item(1)->getElementsByTagName('tbody');
 			$rows = $tbody->item(0)->getElementsByTagName('tr');
 
-			foreach($rows as $row) {	
-
-				$item = $row->getElementsByTagName('td'); 
+			foreach ($rows as $row) 
+			{
+				$item = $row->getElementsByTagName('td');
 				$a = $item->item(1)->getElementsByTagName('a');
 				$url = $a->item(0)->getAttribute('href');
-				
+
 				$torrentId = explode('/', $url);
 				$torrentId = explode('-', $torrentId[sizeof($torrentId) - 1])[0];
 
@@ -257,30 +263,30 @@ class YGGTorrentDLM {
 					'category' => $this->GetCategory($item->item(0)->nodeValue),
 					'name' => trim(preg_replace('/\s+/', ' ', $item->item(1)->nodeValue)),
 					'url' => $url,
-					'download' => preg_replace(array('/{\$1}/', '/{\$2}/'), array($this->subDomainSearch . $this->domain . self::TORRENT_PATH . $torrentId, self::COOKIE), self::DOWNLOAD_URL),
+					'download' => preg_replace(array('/{\$1}/'), array($this->subDomainSearch . $this->domain . self::TORRENT_PATH . $torrentId), self::DOWNLOAD_URL),
 					'hash' => $torrentId,
 					'date' => $this->GetDate($item->item(4)->nodeValue),
 					'size' => $this->GetSize($item->item(5)->nodeValue),
-					'seeder' => (int)$item->item(7)->nodeValue, 
+					'seeder' => (int)$item->item(7)->nodeValue,
 					'leecher' => (int)$item->item(8)->nodeValue
 				];
-				
+
 				$this->AddTorrent($plugin, $torrent);
-			}	
+			}
 		}
 	}
-	
+
 	/**
 	 * Ajoute le torrent dans la liste de DownloadStation
 	 * @param resource $plugin
 	 * @param array $torrent Informations du torrent
 	 */
-	private function AddTorrent($plugin, $torrent) {
-
+	private function AddTorrent($plugin, $torrent)
+	{
 		$plugin->addResult(
-			$torrent['name'], 
-			$torrent['download'], 
-			$torrent['size'], 
+			$torrent['name'],
+			$torrent['download'],
+			$torrent['size'],
 			$torrent['date'],
 			$torrent['url'],
 			$torrent['hash'],
@@ -289,15 +295,14 @@ class YGGTorrentDLM {
 			$torrent['category']
 		);
 	}
-	
+
 	/**
 	 * Supprime le cookie
 	 */
-	private function DeleteCookie() {
-
-		if (file_exists(self::COOKIE)) {
-			unlink(self::COOKIE);
-		}
+	private function DeleteCookie()
+	{
+		if (file_exists(self::COOKIE_YGG))
+			unlink(self::COOKIE_YGG);
 	}
 
 	/**
@@ -307,8 +312,8 @@ class YGGTorrentDLM {
 	 * @param bool $prepare Identifie si curl est initialisé par synology ou non
 	 * @return string Retourne la page au format HTML
 	 */
-	private function Request($url, $curl = null, $prepare = false) {
-
+	private function Request($url, $curl = null, $prepare = false)
+	{
 		if (!isset($curl))
 			$curl = curl_init();
 
@@ -318,11 +323,12 @@ class YGGTorrentDLM {
 			CURLOPT_SSL_VERIFYHOST => false,
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_FOLLOWLOCATION => true,
-			CURLOPT_COOKIEFILE => self::COOKIE,
-			CURLOPT_COOKIEJAR => self::COOKIE
+			CURLOPT_COOKIEFILE => self::COOKIE_YGG,
+			CURLOPT_COOKIEJAR => self::COOKIE_YGG
 		]);
 
-		if(!$prepare) {
+		if (!$prepare) 
+		{
 			$content = curl_exec($curl);
 			curl_close($curl);
 		}
@@ -333,8 +339,8 @@ class YGGTorrentDLM {
 	/**
 	 * Récupére le nom de domaine depuis Mastodon
 	 */
-	private function GetDomainFromMastodon() {
-				
+	private function GetDomainFromMastodon()
+	{
 		$content = $this->Request(self::MASTODON_URL);
 		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
 		$xpath = new DOMXpath($this->document);
@@ -349,8 +355,8 @@ class YGGTorrentDLM {
 	/**
 	 * Récupére le nom de domaine depuis Twitter
 	 */
-	private function GetDomainFromTwitter() {
-		
+	private function GetDomainFromTwitter()
+	{
 		$content = $this->Request(self::TWITTER_URL);
 		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
 		$xpath = new DOMXpath($this->document);
@@ -362,16 +368,16 @@ class YGGTorrentDLM {
 	/**
 	 * Récupére les sous-domaine
 	 */
-	private function GetSubDomain() {
-				
+	private function GetSubDomain()
+	{
 		$content = $this->Request($this->domain);
 		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
 		$xpath = new DOMXpath($this->document);
 
-		$this->subDomainBase = $xpath->query("//*[contains(@class, 'logotype')]");		
+		$this->subDomainBase = $xpath->query("//*[contains(@class, 'logotype')]");
 		$this->subDomainBase = explode('/', $this->subDomainBase[0]->attributes[0]->nextSibling->value)[2];
 		$this->subDomainBase = 'https://' . explode('.', $this->subDomainBase)[0] . '.';
-		
+
 		$this->subDomainSearch = $xpath->query("//*[contains(@class, 'search')]");
 		$this->subDomainSearch = explode('/', $this->subDomainSearch[0]->attributes[0]->nextSibling->value)[2];
 		$this->subDomainSearch = 'https://' . explode('.', $this->subDomainSearch)[0] . '.';
@@ -382,11 +388,11 @@ class YGGTorrentDLM {
 	 * @param string $time Timestamp
 	 * @return string Retourne la date au format 2019-01-01 01:00:00
 	 */
-	private function GetDate($time) {		
-
+	private function GetDate($time)
+	{
 		$timestamp = explode(' ', $time)[0];
 		$date = new DateTime();
-		
+
 		return $date->setTimestamp($timestamp)->format('Y-m-d H:i:s');
 	}
 
@@ -395,31 +401,32 @@ class YGGTorrentDLM {
 	 * @param string $content Page au format HTML
 	 * @return int Retourne le nombre de pages
 	 */
-	private function GetTotalPages($content) {
+	private function GetTotalPages($content)
+	{
+		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
 
-		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content); 
+		$h2 = $this->document->getElementsByTagName('h2');
 
-		$h2 = $this->document->getElementsByTagName('h2'); 
 
 		$total = explode(' ', $h2->item(1)->nodeValue);
 		$total = array_splice($total, 3);
 		$total = implode('', $total);
-		$total = ceil((float)$total / 50);
+		$total = ceil((float) $total / 50) - 1;
 
-		return $total;
+		return (int)$total;
 	}
-	
+
 	/**
 	 * Retourne la categorie du torrent
 	 * @param string $id Identifiant de la categorie
 	 * @return string Retourne le nom de la categorie
 	 */
-	private function GetCategory($id) {
-
-		foreach ($this->categories as $catId => $catName) {
-			if ($catId === (int)$id) {
+	private function GetCategory($id)
+	{
+		foreach ($this->categories as $catId => $catName) 
+		{
+			if ($catId === (int) $id)
 				return $catName;
-			}
 		}
 
 		return 'Autre';
@@ -430,29 +437,30 @@ class YGGTorrentDLM {
 	 * @param string $size Taille du fichier depuis le site
 	 * @return float Retourne la taille en byte
 	 */
-	private function GetSize($size) {
-
+	private function GetSize($size)
+	{
 		$unit = substr($size, strlen($size) - 2, strlen($size));
 		$size = substr($size, 0, strlen($size) - 2);
 
-		switch ($unit) {
-			case 'To': 
-				$size = $size * 1024 * 1024 * 1024 * 1024; 
+		switch ($unit) 
+		{
+			case 'To':
+				$size = $size * 1024 * 1024 * 1024 * 1024;
 				break;
 
-			case 'Go': 
-				$size = $size * 1024 * 1024 * 1024; 
+			case 'Go':
+				$size = $size * 1024 * 1024 * 1024;
 				break;
 
-			case 'Mo': 
-				$size = $size * 1024 * 1024; 
+			case 'Mo':
+				$size = $size * 1024 * 1024;
 				break;
-			
-			case 'ko': 
-				$size = $size * 1024;    
-				break;			
+
+			case 'ko':
+				$size = $size * 1024;
+				break;
 		}
-		
+
 		return (float)$size;
 	}
 }

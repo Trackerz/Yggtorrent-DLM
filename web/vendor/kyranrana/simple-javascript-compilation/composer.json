@@ -1,0 +1,30 @@
+{
+    "name": "kyranrana/simple-javascript-compilation",
+    "description": "Compiles JavaScript code through a series of actions.",
+    "type": "library",
+    "license": "MIT",
+    "version": "0.3.1",
+    "authors": [
+        {
+            "name": "Kyran Rana",
+            "email": "kyranportfolio@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.0",
+        "myclabs/php-enum": "^1.6.6",
+        "ext-bcmath": "*",
+        "ext-mbstring": "*",
+        "ext-curl": "*",
+        "matthiasmullie/minify": "^1.3",
+        "krowinski/bcmath-extended": "^4.2.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.5.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "SimpleJavaScriptCompilation\\": "src/main"
+        }
+    }
+}

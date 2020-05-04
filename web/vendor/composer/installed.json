@@ -1,0 +1,314 @@
+[
+    {
+        "name": "krowinski/bcmath-extended",
+        "version": "4.2.1",
+        "version_normalized": "4.2.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/krowinski/bcmath-extended.git",
+            "reference": "d07e18ca3050b872f04bc1cf5a3b8a3b591c6309"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/krowinski/bcmath-extended/zipball/d07e18ca3050b872f04bc1cf5a3b8a3b591c6309",
+            "reference": "d07e18ca3050b872f04bc1cf5a3b8a3b591c6309",
+            "shasum": ""
+        },
+        "require": {
+            "ext-bcmath": "*",
+            "php": ">=5.3"
+        },
+        "require-dev": {
+            "php": ">=5.4",
+            "phpunit/phpunit": "^4.8|^5.7|^6.5"
+        },
+        "time": "2019-04-15T09:15:39+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "BCMathExtended\\": "src/BCMathExtended/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Kacper Rowiński",
+                "email": "kacper.rowinski@gmail.com"
+            }
+        ],
+        "description": "Extends php BCMath lib for missing functions like floor, ceil, round, abs, min, max, rand for big numbers. Also wraps existing BCMath functions. (more http://php.net/manual/en/book.bc.php) Supports scientific notation.s",
+        "keywords": [
+            "Arbitrary-precision",
+            "abs",
+            "bc",
+            "bcmath",
+            "bignumber",
+            "ceil",
+            "complex-numbers",
+            "floor",
+            "math",
+            "php",
+            "precision",
+            "rand",
+            "round",
+            "scientific-notation"
+        ]
+    },
+    {
+        "name": "kyranrana/cloudflare-bypass",
+        "version": "3.4.0",
+        "version_normalized": "3.4.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/KyranRana/cloudflare-bypass.git",
+            "reference": "522b11853c61af38a5c9dbdbd20e9b99db9091ca"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/KyranRana/cloudflare-bypass/zipball/522b11853c61af38a5c9dbdbd20e9b99db9091ca",
+            "reference": "522b11853c61af38a5c9dbdbd20e9b99db9091ca",
+            "shasum": ""
+        },
+        "require": {
+            "ext-bcmath": "*",
+            "ext-curl": "*",
+            "ext-json": "*",
+            "kyranrana/simple-javascript-compilation": "^0.3.1",
+            "php": "^7.2"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "^6.5.5"
+        },
+        "time": "2020-03-24T20:16:19+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "CloudflareBypass\\": "src/main"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Kyran Rana",
+                "email": "kyranportfolio@gmail.com"
+            }
+        ],
+        "description": "A library for helping bypass the cloudflare UAM page."
+    },
+    {
+        "name": "kyranrana/simple-javascript-compilation",
+        "version": "0.3.1",
+        "version_normalized": "0.3.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/KyranRana/simple-javascript-compilation.git",
+            "reference": "05c57becacf297d5286cd6ea37c458b995c05513"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/KyranRana/simple-javascript-compilation/zipball/05c57becacf297d5286cd6ea37c458b995c05513",
+            "reference": "05c57becacf297d5286cd6ea37c458b995c05513",
+            "shasum": ""
+        },
+        "require": {
+            "ext-bcmath": "*",
+            "ext-curl": "*",
+            "ext-mbstring": "*",
+            "krowinski/bcmath-extended": "^4.2.1",
+            "matthiasmullie/minify": "^1.3",
+            "myclabs/php-enum": "^1.6.6",
+            "php": "^7.0"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "^6.5.5"
+        },
+        "time": "2019-09-17T21:20:24+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "SimpleJavaScriptCompilation\\": "src/main"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Kyran Rana",
+                "email": "kyranportfolio@gmail.com"
+            }
+        ],
+        "description": "Compiles JavaScript code through a series of actions."
+    },
+    {
+        "name": "matthiasmullie/minify",
+        "version": "1.3.63",
+        "version_normalized": "1.3.63.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/matthiasmullie/minify.git",
+            "reference": "9ba1b459828adc13430f4dd6c49dae4950dc4117"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/matthiasmullie/minify/zipball/9ba1b459828adc13430f4dd6c49dae4950dc4117",
+            "reference": "9ba1b459828adc13430f4dd6c49dae4950dc4117",
+            "shasum": ""
+        },
+        "require": {
+            "ext-pcre": "*",
+            "matthiasmullie/path-converter": "~1.1",
+            "php": ">=5.3.0"
+        },
+        "require-dev": {
+            "friendsofphp/php-cs-fixer": "~2.0",
+            "matthiasmullie/scrapbook": "~1.0",
+            "phpunit/phpunit": "~4.8"
+        },
+        "suggest": {
+            "psr/cache-implementation": "Cache implementation to use with Minify::cache"
+        },
+        "time": "2020-01-21T20:21:08+00:00",
+        "bin": [
+            "bin/minifycss",
+            "bin/minifyjs"
+        ],
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "MatthiasMullie\\Minify\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Matthias Mullie",
+                "email": "minify@mullie.eu",
+                "homepage": "http://www.mullie.eu",
+                "role": "Developer"
+            }
+        ],
+        "description": "CSS & JavaScript minifier, in PHP. Removes whitespace, strips comments, combines files (incl. @import statements and small assets in CSS files), and optimizes/shortens a few common programming patterns.",
+        "homepage": "http://www.minifier.org",
+        "keywords": [
+            "JS",
+            "css",
+            "javascript",
+            "minifier",
+            "minify"
+        ]
+    },
+    {
+        "name": "matthiasmullie/path-converter",
+        "version": "1.1.3",
+        "version_normalized": "1.1.3.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/matthiasmullie/path-converter.git",
+            "reference": "e7d13b2c7e2f2268e1424aaed02085518afa02d9"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/matthiasmullie/path-converter/zipball/e7d13b2c7e2f2268e1424aaed02085518afa02d9",
+            "reference": "e7d13b2c7e2f2268e1424aaed02085518afa02d9",
+            "shasum": ""
+        },
+        "require": {
+            "ext-pcre": "*",
+            "php": ">=5.3.0"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "~4.8"
+        },
+        "time": "2019-02-05T23:41:09+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "MatthiasMullie\\PathConverter\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Matthias Mullie",
+                "email": "pathconverter@mullie.eu",
+                "homepage": "http://www.mullie.eu",
+                "role": "Developer"
+            }
+        ],
+        "description": "Relative path converter",
+        "homepage": "http://github.com/matthiasmullie/path-converter",
+        "keywords": [
+            "converter",
+            "path",
+            "paths",
+            "relative"
+        ]
+    },
+    {
+        "name": "myclabs/php-enum",
+        "version": "1.7.6",
+        "version_normalized": "1.7.6.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/myclabs/php-enum.git",
+            "reference": "5f36467c7a87e20fbdc51e524fd8f9d1de80187c"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/myclabs/php-enum/zipball/5f36467c7a87e20fbdc51e524fd8f9d1de80187c",
+            "reference": "5f36467c7a87e20fbdc51e524fd8f9d1de80187c",
+            "shasum": ""
+        },
+        "require": {
+            "ext-json": "*",
+            "php": ">=7.1"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "^7",
+            "squizlabs/php_codesniffer": "1.*",
+            "vimeo/psalm": "^3.8"
+        },
+        "time": "2020-02-14T08:15:52+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "MyCLabs\\Enum\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "PHP Enum contributors",
+                "homepage": "https://github.com/myclabs/php-enum/graphs/contributors"
+            }
+        ],
+        "description": "PHP Enum implementation",
+        "homepage": "http://github.com/myclabs/php-enum",
+        "keywords": [
+            "enum"
+        ]
+    }
+]
