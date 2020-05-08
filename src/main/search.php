@@ -1,14 +1,14 @@
 <?php
 
 /**
- * YggTorrentDLM
+ * YGGTorrentDLM
  * 
  * Parse les résultats de la recherche de l'utilisateur sur le site YGGTorrent
  * et les affiches dans DownloadStation ce qui permet de visualiser et téléchagrer directement 
  * un torrent depuis le NAS sans jamais passer par le site
  */
 
-class YggTorrentDLM
+class YGGTorrentDLM
 {
 	/**
 	 * @var int $max_pages Nombres de pages maximum pour la recherche
@@ -26,14 +26,9 @@ class YggTorrentDLM
 	const TWITTER_URL = 'https://twitter.com/yggtorrent_p2p';
 
 	/**
-	 * @var string DOWNLOAD_URL Url du fichier ygg.php
-	 */
-	const DOWNLOAD_URL = 'https://127.0.0.1/ygg.php?torrent={$1}';
-
-	/**
 	 * @var string CF_BYPASS Url du fichier cfbypass.php
 	 */
-	const CLOUDFLARE_BYPASS = 'https://127.0.0.1/cfbypass.php?query={$1}&domain={$2}&page={$3}';
+	const YGGFILE_URL = 'https://127.0.0.1/yggtorrent/ygg.php?type={$1}&url={$2}&page={$3}&query={$4}&cookie={$5}';
 
 	/**
 	 * @var string TORRENT_PATH Chemin permettant de télécharge un .torrent
@@ -46,9 +41,14 @@ class YggTorrentDLM
 	const AUTH_PATH = '/user/login';
 
 	/**
-	 * @var string COOKIE_FILE Emplacement du cookie
+	 * @var string COOKIE_YGG Emplacement du cookie
 	 */
 	const COOKIE_YGG = '/tmp/yggtorrent.cookie';
+
+	/**
+	 * @var string COOKIE_CLOUDFLARE Emplacement du cookie
+	 */
+	const COOKIE_CLOUDFLARE = '/tmp/cloudflare.cookie';
 
 	/**
 	 * @var string $domain Nom de domaine
@@ -141,7 +141,7 @@ class YggTorrentDLM
 			2186 => 'Sport',
 			2187 => 'Vidéo-clips',
 
-			// Adulte (FAP FAP FAP)
+			// Adulte (On dit merci qui? :p)
 			2189 => 'Film',
 			2190 => 'Hentai',
 			2191 => 'Image'
@@ -159,13 +159,18 @@ class YggTorrentDLM
 	 */
 	public function prepare($curl, $query, $username, $password)
 	{
-		if ($this->VerifyAccount($username, $password)) 
-		{
+		if ($this->VerifyAccount($username, $password)) {
 			$this->query = $query;
 			$url = preg_replace(
-				array('/{\$1}/', '/{\$2}/', '/{\$3}/'),
-				array(urlencode($this->query), $this->subDomainSearch . $this->domain, 0),
-				self::CLOUDFLARE_BYPASS
+				array('/{\$1}/', '/{\$2}/', '/{\$3}/', '/{\$4}/', '/{\$5}/'),
+				array(
+					'search',
+					$this->subDomainSearch . $this->domain,
+					0,
+					urlencode($this->query),
+					self::COOKIE_CLOUDFLARE
+				),
+				self::YGGFILE_URL
 			);
 
 			return $this->Request($url, $curl, true);
@@ -184,16 +189,20 @@ class YggTorrentDLM
 		$totalPages = $this->GetTotalPages($response);
 		$this->ParseContent($plugin, $response);
 
-		if ($totalPages > 1) 
-		{
+		if ($totalPages > 1) {
 			$totalPages = $totalPages > self::MAX_PAGE - 1 ? self::MAX_PAGE - 1 : $totalPages;
 
-			for ($i = 1; $i <= $totalPages; $i++) 
-			{
+			for ($i = 1; $i <= $totalPages; $i++) {
 				$url = preg_replace(
-					array('/{\$1}/', '/{\$2}/', '/{\$3}/'),
-					array(urlencode($this->query), $this->subDomainSearch . $this->domain, $i * 50),
-					self::CLOUDFLARE_BYPASS
+					array('/{\$1}/', '/{\$2}/', '/{\$3}/', '/{\$4}/', '/{\$5}/'),
+					array(
+						'search',
+						$this->subDomainSearch . $this->domain,
+						0,
+						urlencode($this->query),
+						self::COOKIE_CLOUDFLARE
+					),
+					self::YGGFILE_URL
 				);
 
 				$content = $this->Request($url, null, false);
@@ -216,8 +225,9 @@ class YggTorrentDLM
 		$this->DeleteCookie();
 		$this->GetDomainFromTwitter();
 
-		if (empty($this->domain))
+		if (empty($this->domain)) {
 			$this->GetDomainFromMastodon();
+		}
 
 		$this->GetSubDomain();
 
@@ -245,13 +255,11 @@ class YggTorrentDLM
 
 		$table = $this->document->getElementsByTagName('table');
 
-		if ($table->length > 1) 
-		{
+		if ($table->length > 1) {
 			$tbody = $table->item(1)->getElementsByTagName('tbody');
 			$rows = $tbody->item(0)->getElementsByTagName('tr');
 
-			foreach ($rows as $row) 
-			{
+			foreach ($rows as $row) {
 				$item = $row->getElementsByTagName('td');
 				$a = $item->item(1)->getElementsByTagName('a');
 				$url = $a->item(0)->getAttribute('href');
@@ -263,12 +271,20 @@ class YggTorrentDLM
 					'category' => $this->GetCategory($item->item(0)->nodeValue),
 					'name' => trim(preg_replace('/\s+/', ' ', $item->item(1)->nodeValue)),
 					'url' => $url,
-					'download' => preg_replace(array('/{\$1}/'), array($this->subDomainSearch . $this->domain . self::TORRENT_PATH . $torrentId), self::DOWNLOAD_URL),
+					'download' => preg_replace(
+						array('/{\$1}/', '/{\$2}/', '/{\$5}/'),
+						array(
+							'download',
+							$this->subDomainSearch . $this->domain . self::TORRENT_PATH . $torrentId,
+							self::COOKIE_YGG
+						),
+						self::YGGFILE_URL
+					),
 					'hash' => $torrentId,
 					'date' => $this->GetDate($item->item(4)->nodeValue),
 					'size' => $this->GetSize($item->item(5)->nodeValue),
-					'seeder' => (int)$item->item(7)->nodeValue,
-					'leecher' => (int)$item->item(8)->nodeValue
+					'seeder' => (int) $item->item(7)->nodeValue,
+					'leecher' => (int) $item->item(8)->nodeValue
 				];
 
 				$this->AddTorrent($plugin, $torrent);
@@ -301,8 +317,9 @@ class YggTorrentDLM
 	 */
 	private function DeleteCookie()
 	{
-		if (file_exists(self::COOKIE_YGG))
+		if (file_exists(self::COOKIE_YGG)) {
 			unlink(self::COOKIE_YGG);
+		}
 	}
 
 	/**
@@ -314,8 +331,9 @@ class YggTorrentDLM
 	 */
 	private function Request($url, $curl = null, $prepare = false)
 	{
-		if (!isset($curl))
+		if (!isset($curl)) {
 			$curl = curl_init();
+		}
 
 		curl_setopt_array($curl, [
 			CURLOPT_URL => $url,
@@ -327,8 +345,7 @@ class YggTorrentDLM
 			CURLOPT_COOKIEJAR => self::COOKIE_YGG
 		]);
 
-		if (!$prepare) 
-		{
+		if (!$prepare) {
 			$content = curl_exec($curl);
 			curl_close($curl);
 		}
@@ -413,7 +430,7 @@ class YggTorrentDLM
 		$total = implode('', $total);
 		$total = ceil((float) $total / 50) - 1;
 
-		return (int)$total;
+		return (int) $total;
 	}
 
 	/**
@@ -423,10 +440,10 @@ class YggTorrentDLM
 	 */
 	private function GetCategory($id)
 	{
-		foreach ($this->categories as $catId => $catName) 
-		{
-			if ($catId === (int) $id)
+		foreach ($this->categories as $catId => $catName) {
+			if ($catId === (int) $id) {
 				return $catName;
+			}
 		}
 
 		return 'Autre';
@@ -442,8 +459,7 @@ class YggTorrentDLM
 		$unit = substr($size, strlen($size) - 2, strlen($size));
 		$size = substr($size, 0, strlen($size) - 2);
 
-		switch ($unit) 
-		{
+		switch ($unit) {
 			case 'To':
 				$size = $size * 1024 * 1024 * 1024 * 1024;
 				break;
@@ -461,6 +477,6 @@ class YggTorrentDLM
 				break;
 		}
 
-		return (float)$size;
+		return (float) $size;
 	}
 }

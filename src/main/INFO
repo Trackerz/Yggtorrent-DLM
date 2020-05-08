@@ -1,0 +1,11 @@
+{
+    "name": "YGGTorrentDLM",
+    "displayname": "YGGTorrentDLM",
+    "description": "YGGTorrentDLM Private Tracker",
+    "version": "2.0",
+    "accountsupport": true,
+    "site": "https://yggtorrent.se/",
+    "module": "search.php",
+    "type": "search",
+    "class": "YGGTorrentDLM"
+}
