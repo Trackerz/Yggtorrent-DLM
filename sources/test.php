@@ -1,39 +1,41 @@
 <?php
-
-require '../main/search.php';
+require('search.php');
 
 $username = '';
 $password = '';
 $request = 'game of throne';
 
 $ygg = new YGGTorrentDLM();
+$curl = curl_init();
 
-if ($ygg->VerifyAccount($username, $password)) {
-    echo '<p style="color:green">CONNECTED</p>';
+if($ygg->VerifyAccount($username, $password)) {
 
-    $curl = curl_init();
+    echo '<p style="color:green">CONNECTED</p>';    
+
     $ygg->prepare($curl, $request, $username, $password);
-    $content = curl_exec($curl);
+
+    $response = curl_exec($curl);
     curl_close($curl);
 
     $plugin = new Plugin();
-    $count = $ygg->parse($plugin, $content);
+    $count = $ygg->parse($plugin, $response);
 
-    echo '</br>Total torrent : ' . $plugin->Total() . '</br></br>';
+    echo '</br>Total results : ' . $plugin->Total() . '</br></br>';
     echo '<pre>';
-    var_dump($plugin->torrents);
+    var_dump($plugin->results);
     echo '</pre>';
+    
 } else {
     echo '<p style="color:red">NOT CONNECTED</p>';
 }
 
-class Plugin
-{
-    public $torrents;
+class Plugin {
+        
+    public $results;
 
-    public function AddResult($title, $download, $size, $datetime, $page, $hash, $seeds, $leechs, $category)
-    {
-        $this->torrents[] = array(
+    public function AddResult($title, $download, $size, $datetime, $page, $hash, $seeds, $leechs, $category) {
+        
+        $this->results[] = array(
             'title' => $title,
             'download' => $download,
             'size' => $size,
@@ -46,8 +48,7 @@ class Plugin
         );
     }
 
-    public function Total()
-    {
-        return count($this->torrents);
+    public function Total() {                
+        return count($this->results);
     }
 }

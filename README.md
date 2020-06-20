@@ -12,10 +12,10 @@ Version fonctionnelle pour [YggTorrent.se](https://yggtorrent.se/)
 # Installation :  
 
 - Installer **WebStation**
-- Installer **PHP version 7.2 minimum** 
+- Installer **PHP** 
 - Ouvrir **WebStation** 
-  - Aller dans **Paramétres PHP > Modifier** et cocher les extensions **CURL** + **BCMATH**
-- Placer le dossier **yggrorrent** à la racine du dossier web sur le NAS
+  - Aller dans **Paramétres PHP > Modifier** et cocher les extensions **CURL**
+- Placer le fichier **ygg.php** à la racine du dossier web sur le NAS
 - Ouvrir **DownloadStation** 
   - Aller dans **Paramétres > Recherche BT > Ajouter** et selectionner le fichier **yggtorrent.dlm** puis valider
   - Le plugin doit apparaître dans la liste et il faut simplement cliquer sur **Modifier** et entrer ses identifiants du site puis faire **Vérifier**.  
