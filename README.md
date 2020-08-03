@@ -7,8 +7,6 @@ Cette limitation est faite pour l'application mobile **DS-GET** qui ne peut pas 
 
 La récupération du nom de domaine se fait automatiquement depuis [Twiter](https://twitter.com/yggtorrent_p2p) en priorité ou bien sur [Mastodon](https://mamot.fr/@YggTorrent) en secours ce qui évite de mettre à jour le code si un changement de nom domaine est effectué
 
-Version fonctionnelle pour [YggTorrent.se](https://yggtorrent.se/)
-
 # Installation :  
 
 - Installer **WebStation**
