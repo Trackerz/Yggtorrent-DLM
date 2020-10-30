@@ -24,6 +24,8 @@ class YGGTorrentDLM {
 	 * @var string TWITTER_URL Url du twitter Yggtorrent
 	 */
 	const TWITTER_URL = 'https://twitter.com/yggtorrent_p2p';
+    
+    const TELEGRAM_URL = 'https://t.me/yggtorrent';
 
 	/**
 	 * @var string DOWNLOAD_URL Url du fichier ygg.php
@@ -48,7 +50,7 @@ class YGGTorrentDLM {
 	/**
 	 * @var string COOKIE_FILE Emplacement du cookie
 	 */
-	const COOKIE = '/tmp/yggtorrent.cookie';
+	const COOKIE = '/tmp/yggtorrent/yggtorrent.cookie';
 	
 	/**
 	 * @var string $domain Nom de domaine
@@ -206,26 +208,56 @@ class YGGTorrentDLM {
 	 */    
 	public function VerifyAccount($username, $password) { 
 			
-		$this->DeleteCookie();
-		$this->GetDomainFromTwitter();
+        //echo 'VerifyAccount: ' . $username . '/' . $password . '  ';
+        $this->DeleteCookie();
+        //$this->GetDomainFromTwitter();
+        $this->GetDomainFromTelegram();
+        
+        if(empty($this->domain)) {
+            $this->GetDomainFromMastodon();
+        }
+        
+        //echo '$this->domain: ' . $this->domain;
+//        $this->domain = 'yggtorrent.si';
+        
+        $this->GetSubDomain();
+        
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_POSTFIELDS, array('id' => urlencode($username), 'pass' => urlencode($password), 'ci_csrf_token' => '' ));
+        $this->Request($this->subDomainBase . $this->domain . self::AUTH_PATH, $curl);
+        
+        // 2 fois, je sais pas pourquoi, mais ça permet de faire marcher, histoire de cookies peut-être
+        
+        // $curl = curl_init();
+        // curl_setopt($curl, CURLOPT_POSTFIELDS, array('id' => urlencode($username), 'pass' => urlencode($password), 'ci_csrf_token' => '' ));
+        // $this->Request($this->subDomainBase . $this->domain . self::AUTH_PATH, $curl);
 
-		if(empty($this->domain)) {
-			$this->GetDomainFromMastodon();
-		}
+        $content = $this->Request($this->subDomainBase . $this->domain);
+       // echo 'content: ' . $content;
+                
+        @$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
+        $xpath = new DOMXpath($this->document);
+        $ratio = $xpath->query("//*[contains(@class, 'ico_upload')]");
 
-		$this->GetSubDomain();
-		
-		$curl = curl_init();		
-		curl_setopt($curl, CURLOPT_POSTFIELDS, array('id' => urlencode($username), 'pass' => urlencode($password)));
-		$this->Request($this->subDomainBase . $this->domain . self::AUTH_PATH, $curl);
-		
-		$content = $this->Request($this->subDomainBase . $this->domain);
-				
-		@$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
-		$xpath = new DOMXpath($this->document);
-		$ratio = $xpath->query("//*[contains(@class, 'ico_upload')]");
+        $connected = $ratio->length > 0;
 
-		return $ratio->length > 0 ? true : false;
+        if (!$connected) {
+            // 2 fois, je sais pas pourquoi, mais ça permet de faire marcher, histoire de cookies peut-être
+            
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_POSTFIELDS, array('id' => urlencode($username), 'pass' => urlencode($password), 'ci_csrf_token' => '' ));
+            $this->Request($this->subDomainBase . $this->domain . self::AUTH_PATH, $curl);
+
+            $content = $this->Request($this->subDomainBase . $this->domain);
+           // echo 'content: ' . $content;
+                    
+            @$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
+            $xpath = new DOMXpath($this->document);
+            $ratio = $xpath->query("//*[contains(@class, 'ico_upload')]");
+
+        }
+
+        return $ratio->length > 0 ? true : false;
 	}
 
 	/**
@@ -358,6 +390,32 @@ class YGGTorrentDLM {
 		$this->domain = $xpath->query("//*[contains(@class, 'ProfileHeaderCard-urlText')]");
 		$this->domain = str_replace(array(' ', PHP_EOL), array('', ''), $this->domain[0]->textContent);
 	}
+
+   /* Extrait domaine depuis adresse
+    * from : https://stackoverflow.com/questions/276516/parsing-domain-from-a-url
+    */
+    function get_domain($url = SITE_URL)
+    {
+        if ((substr($url,0,strlen('http://')) <> 'http://') && (substr($url,0,strlen('https://')) <> 'https://'))
+            $url = 'http://'.$url;
+        preg_match("/[a-z0-9\-]{1,63}\.[a-z\.]{2,6}$/", parse_url($url, PHP_URL_HOST), $_domain_tld);
+        return $_domain_tld[0];
+    }
+
+  /**
+   * Récupére le nom de domaine depuis Telegram
+   */
+   private function GetDomainFromTelegram() {
+       $content = $this->Request(self::TELEGRAM_URL);
+       //echo 'telegram: ' . $content . ' ';
+       // <div class="tgme_page_description" dir="auto">L&#39;adresse officiel de Yggtorrent est : https://www.yggtorrent.si/</div>
+       @$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
+       $xpath = new DOMXpath($this->document);
+       $this->domain = $xpath->query("//*[contains(@class, 'tgme_page_description')]");
+       $this->domain = str_replace(array(' ', PHP_EOL), array('', ''), $this->domain[0]->textContent);
+       preg_match_all('#\bhttps?://[^,\s()<>]+(?:\([\w\d]+\)|([^,[:punct:]\s]|/))#', $this->domain, $match);
+       $this->domain = $this->get_domain($match[0][0]);
+   }
 
 	/**
 	 * Récupére les sous-domaine
