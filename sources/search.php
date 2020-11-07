@@ -195,7 +195,7 @@ class YGGTorrentDLM
 
 			for ($i = 1; $i <= $totalPages; $i++) 
 			{
-				$url = $this->subDomain . preg_replace(array('/{\$1}/', '/{\$2}/'), array(urlencode($this->query), $i * 50), $this->searchPath);
+				$url = $this->subDomain . $this->domain . preg_replace(array('/{\$1}/', '/{\$2}/'), array(urlencode($this->query), $i * 50), $this->searchPath);
 				$content = $this->Request($url);		
 				$this->ParseContent($plugin, $content);
 			}
@@ -278,7 +278,7 @@ class YGGTorrentDLM
 					'category' => $this->GetCategory($item->item(0)->nodeValue),
 					'name' => trim(preg_replace('/\s+/', ' ', $item->item(1)->nodeValue)),
 					'url' => $url,
-					'download' => preg_replace(array('/{\$1}/', '/{\$2}/'), array($this->subDomain . self::TORRENT_PATH . $torrentId, self::COOKIE), $this->downloadUrl),
+					'download' => preg_replace(array('/{\$1}/', '/{\$2}/'), array($this->subDomain . $this->domain . self::TORRENT_PATH . $torrentId, self::COOKIE), $this->downloadUrl),
 					'hash' => $torrentId,
 					'date' => $this->GetDate($item->item(4)->nodeValue),
 					'size' => $this->GetSize($item->item(5)->nodeValue),
