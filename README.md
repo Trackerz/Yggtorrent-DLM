@@ -5,7 +5,7 @@ Permet de rechercher et de télécharger des torrents sur **YGGTorrent** directe
 La recherche est limitée à **1000** résultats ce qui représente quand meme **20 pages** sur le site  
 Cette limitation est faite pour l'application mobile **DS-GET** qui ne peut pas afficher plus de résultats
 
-La récupération du nom de domaine se fait automatiquement depuis [Twitter](https://twitter.com/yggtorrent_p2p) en priorité ou bien sur [Mastodon](https://mamot.fr/@YggTorrent) en secours ce qui évite de mettre à jour le code si un changement de nom domaine est effectué
+La récupération du nom de domaine se fait automatiquement depuis [Twitter](https://twitter.com/yggtorrent_p2p) / [Mastodon](https://mamot.fr/@YggTorrent) / [Telegram](https://t.me/yggtorrent) ce qui évite de mettre à jour le code si un changement de nom domaine est effectué
 
 # Installation :  
 
