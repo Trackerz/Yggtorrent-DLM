@@ -15,7 +15,7 @@ La récupération du nom de domaine se fait automatiquement depuis [Twitter](htt
   - Aller dans **Paramétres PHP > Modifier** et cocher les extensions **CURL**
 - Placer le fichier **ygg.php** à la racine du dossier web sur le NAS
 - Ouvrir **DownloadStation** 
-  - Aller dans **Paramétres > Recherche BT > Ajouter** et selectionner le fichier **yggtorrent.dlm** puis valider
+  - Aller dans **Paramétres > Recherche BT > Ajouter** et selectionner le fichier **yggtorrent.v1.2.5.dlm** puis valider
   - Le plugin doit apparaître dans la liste et il faut simplement cliquer sur **Modifier** et entrer ses identifiants du site puis faire **Vérifier**.  
   - Un message doit indiquer que la **connexion est réussie**
 
