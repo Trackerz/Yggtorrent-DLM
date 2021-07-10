@@ -1,8 +1,6 @@
 <?php
 /**
  * /!\ Ne pas modifier ce fichier /!\
- * /!\ Ne pas modifier ce fichier /!\
- * /!\ Ne pas modifier ce fichier /!\
  */
 
 $curl = curl_init();

@@ -1,11 +1,11 @@
-# YGGTorrent-DLM
+# YGGTorrent-DLM - DSM 6.x / 7.x
 
 Permet de rechercher et de télécharger des torrents sur **YGGTorrent** directement depuis un **NAS Synology** via **DownloadStation** ou bien sur mobile avec l'application **DS-GET**
 
 La recherche est limitée à **1000** résultats ce qui représente quand meme **20 pages** sur le site  
 Cette limitation est faite pour l'application mobile **DS-GET** qui ne peut pas afficher plus de résultats
 
-La récupération du nom de domaine se fait automatiquement depuis [Twitter](https://twitter.com/yggtorrent_p2p) / [Mastodon](https://mamot.fr/@YggTorrent) / [Telegram](https://t.me/yggtorrent) ce qui évite de mettre à jour le code si un changement de nom domaine est effectué
+La récupération du nom de domaine se fait automatiquement depuis [Twitter](https://twitter.com/yggtorrent_p2p) / [Mastodon](https://mamot.fr/@YggTorrent) ce qui évite de mettre à jour le code si un changement de nom domaine est effectué
 
 # Installation :  
 
@@ -15,7 +15,7 @@ La récupération du nom de domaine se fait automatiquement depuis [Twitter](htt
   - Aller dans **Paramétres PHP > Modifier** et cocher les extensions **CURL**
 - Placer le fichier **ygg.php** à la racine du dossier web sur le NAS
 - Ouvrir **DownloadStation** 
-  - Aller dans **Paramétres > Recherche BT > Ajouter** et selectionner le fichier **yggtorrent.v1.3.0.dlm** puis valider
+  - Aller dans **Paramétres > Recherche BT > Ajouter** et selectionner le fichier **yggtorrent.v1.3.1.dlm** puis valider
   - Le plugin doit apparaître dans la liste et il faut simplement cliquer sur **Modifier** et entrer ses identifiants du site puis faire **Vérifier**.  
   - Un message doit indiquer que la **connexion est réussie**
 
