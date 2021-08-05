@@ -5,7 +5,6 @@ error_reporting(E_ALL);
 
 require('search.php');
 
-
 $username = '';
 $password = '';
 $request  = 'Game of Thrones';

@@ -43,6 +43,11 @@ class YGGTorrentDLM
 	private $searchPath = '/engine/search?do=search&sort=publish_date&order=desc&name={$1}&page={$2}';
 
 	/**
+	 * @var bool Selectionne la version du build
+	 */
+	private $buildForDsm6 = false;
+
+	/**
 	 * @var Array List des réseaux sociaux
 	 */
 	private $socials;
@@ -256,31 +261,47 @@ class YGGTorrentDLM
 		$items = $xpath->query("//*[contains(@class, 'results')]/table/tbody/tr");
 
 		foreach ($items as $item) 
-		{	
-			$plugin->addResult(
-				// Title
-				trim($item->childNodes[3]->textContent),
-				// Download		
-				preg_replace(
-					array('/{\$1}/', '/{\$2}/'),
-					array($this->subDomain . $this->domain . self::TORRENT_PATH . $item->childNodes[5]->firstChild->getAttribute('target'), self::COOKIE),
-					$this->downloadUrl
-				),				
-				// Size
-				$this->GetSize($item->childNodes[11]->textContent),
-				// Date
-				(new DateTime())->setTimestamp(explode(' ', $item->childNodes[9]->textContent)[0])->format('Y-m-d H:i:s'),
-				// URL
-				$item->childNodes[3]->firstChild->getAttribute('href'),
-				// Hash
-				$item->childNodes[5]->firstChild->getAttribute('target'),
-				// Seeder	
-				(int)$item->childNodes[15]->textContent,
-				// Leecher
-				(int)$item->childNodes[17]->textContent,
-				// Category
-				$this->GetCategory($item->childNodes[1]->textContent)
-			);
+		{
+			if($this->buildForDsm6)		
+			{		
+				// DSM 6
+				preg_match('/\/([0-9]+)-/', $item->childNodes[2]->firstChild->getAttribute('href'), $torrentHash);
+				
+				$plugin->addResult(
+					trim($item->childNodes[2]->textContent),
+					preg_replace(
+						array('/{\$1}/', '/{\$2}/'), 
+						array($this->subDomain . $this->domain . self::TORRENT_PATH . $torrentHash[1], self::COOKIE),
+						$this->downloadUrl
+					),		
+					$this->GetSize($item->childNodes[10]->textContent),
+					(new DateTime())->setTimestamp((int)$item->childNodes[8]->textContent)->format('Y-m-d H:i:s'),
+					$item->childNodes[2]->firstChild->getAttribute('href'),
+					$torrentHash[1],
+					(int)$item->childNodes[14]->textContent,
+					(int)$item->childNodes[16]->textContent,
+					$this->GetCategory((int)$item->childNodes[0]->textContent)
+				);
+			}
+			else 
+			{
+				// DSM 7			
+				$plugin->addResult(
+					trim($item->childNodes[3]->textContent),
+					preg_replace(
+						array('/{\$1}/', '/{\$2}/'),
+						array($this->subDomain . $this->domain . self::TORRENT_PATH . $item->childNodes[5]->firstChild->getAttribute('target'), self::COOKIE),
+						$this->downloadUrl
+					),		
+					$this->GetSize($item->childNodes[11]->textContent),
+					(new DateTime())->setTimestamp(explode(' ', $item->childNodes[9]->textContent)[0])->format('Y-m-d H:i:s'),
+					$item->childNodes[3]->firstChild->getAttribute('href'),
+					$item->childNodes[5]->firstChild->getAttribute('target'),
+					(int)$item->childNodes[15]->textContent,
+					(int)$item->childNodes[17]->textContent,
+					$this->GetCategory((int)$item->childNodes[1]->textContent)
+				);
+			}
 		}
 	}
 
@@ -290,7 +311,9 @@ class YGGTorrentDLM
 	private function DeleteCookie()
 	{
 		if (file_exists(self::COOKIE))
+		{
 			unlink(self::COOKIE);
+		}
 	}
 
 	/**
