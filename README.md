@@ -13,6 +13,8 @@ La récupération du nom de domaine se fait automatiquement depuis [Twitter](htt
 - Installer **PHP** 
 - Ouvrir **WebStation** 
   - Aller dans **Paramètres PHP > Modifier** et cocher les extensions **CURL**
+  - DMS 7 Aller dans **Portail de services web > Modifier le serveur web par défaut > selectionner la version de PHP**
+  - DSM 6 Aller dans **Paramètres généraux > selectionner la version de PHP**
 - Placer le fichier **ygg.php** à la racine du dossier web sur le NAS
 - Ouvrir **DownloadStation** 
   - Aller dans **Paramétres > Recherche BT > Ajouter** et selectionner le fichier **yggtorrent.v1.3.3-dsm6.dlm** ou **yggtorrent.v1.3.3-dsm7.dlm** suivant votre version de DSM puis valider
