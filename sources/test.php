@@ -22,14 +22,15 @@ if ($ygg->VerifyAccount($username, $password))
     curl_close($curl);
 
     $plugin = new Plugin();
-    $count = $ygg->parse($plugin, $response);
+    $ygg->parse($plugin, $response);
 
     echo '<p style="font-family:sans-serif;font-size:14px">Nombre de torrent : <b>' . $plugin->Total() . '</b><p>';
     echo '<pre>';
     var_dump($plugin->results);
     echo '</pre>';
 } 
-else {
+else
+{
     echo '<p style="font-family:sans-serif;font-size:14px;color:red">DECONNECTE</p>';
 }
 
