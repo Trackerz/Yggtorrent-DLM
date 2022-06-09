@@ -78,6 +78,11 @@ class YGGTorrentDLM
     private $query;
 
     /**
+     * @var bool Active/Desactive les logs
+     */
+    private $debug = false;
+
+    /**
      * Constructeur de la classe
      */
     public function __construct()
@@ -85,15 +90,14 @@ class YGGTorrentDLM
         $this->document = new DOMDocument();
 
         $this->socials = array(
-            'twitter' => array(
-                'url' => 'twitter.com/yggtorrent_p2p',
-                'class' => 'twitter-timeline-link'
-            ),
             'mastodon' => array(
                 'url' => 'mamot.fr/@YggTorrent',
                 'class' => 'account__header__fields'
-            ),
-            /* Plus mis a jour
+            )        
+            /*'twitter' => array(
+                'url' => 'twitter.com/yggtorrent_p2p',
+                'class' => 'twitter-timeline-link'
+            ),            
             'telegram' => array(
                 'url' => 't.me/yggtorrent',
                 'class' => 'tgme_page_description'
@@ -230,6 +234,8 @@ class YGGTorrentDLM
      */
     public function VerifyAccount($username, $password)
     {
+        $this->Debug('Verification des identifiants');
+
         $this->DeleteCookie();
 
         foreach($this->socials as $social)
@@ -291,9 +297,14 @@ class YGGTorrentDLM
      * Supprime le cookie
      */
     private function DeleteCookie()
-    {
-        if (file_exists(self::COOKIE))
+    {        
+        $this->Debug('Suppression du cookie');
+
+        if (file_exists(self::COOKIE)) 
+        {
             unlink(self::COOKIE);
+            $this->Debug('Cookie supprime');
+        }
     }
 
     /**
@@ -341,10 +352,14 @@ class YGGTorrentDLM
      */
     private function GetDomain($social)
     {
+        $this->Debug('Recuperation du nom de domaine');
+
         $xpath = $this->Request($social['url']);
         $this->domain = $xpath->query("//*[contains(@class, '" . $social['class'] . "')]");
         preg_match('/([a-zA-Z0-9-]+\.)*([a-zA-Z0-9-]+\.[a-zA-Z0-9-]+)/', $this->domain[0]->textContent, $match);
         $this->domain = $match[2];
+
+        $this->Debug('Nom de domaine : ' . $this->domain);
 
         $this->GetSubDomain();
     }
@@ -354,10 +369,14 @@ class YGGTorrentDLM
      */
     private function GetSubDomain()
     {
+        $this->Debug('Recuperation du sous domaine');
+
         $xpath = $this->Request($this->domain);
         $this->subDomain = $xpath->query("//*[contains(@class, 'search')]");
         preg_match('/[a-zA-Z0-9-]+\./', $this->subDomain[0]->getAttribute('action'), $match);
         $this->subDomain = $match[0];
+
+        $this->Debug('Sous domaine : ' . $this->subDomain);
     }
 
     /**
@@ -367,7 +386,9 @@ class YGGTorrentDLM
      * @return int Nombre de pages
      */
     private function GetTotalPages($xpath)
-    {
+    {        
+        $this->Debug('Calcul du nombre de pages');
+
         $total = $xpath->query("//*[contains(@id, '#torrents')]/h2");
 
         if ($total->length > 0)
@@ -375,8 +396,12 @@ class YGGTorrentDLM
             preg_match('/[0-9]+/', $total[0]->textContent, $match);
             $total = ceil((float)$match[0] / 50);
 
+            $this->Debug('Nombre de pages ' . $total);
+
             return $total;
         }
+
+        $this->Debug('Nombre de page 1');
 
         return 0;
     }
@@ -428,5 +453,18 @@ class YGGTorrentDLM
         }
 
         return $size;
+    }
+
+    /**
+     * Log les actions
+     * 
+     * @param string $data Log une action7
+     */
+    private function Debug($data)
+    {
+        if($this->debug)
+        {
+            file_put_contents('/tmp/yggtorrent.log', (new Datetime())->format('d-m-Y H:i:s') . ' : ' . $data . PHP_EOL, FILE_APPEND);
+        }
     }
 }
