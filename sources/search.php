@@ -45,7 +45,7 @@ class YGGTorrentDLM
     /**
      * @var bool Selectionne la version du build
      */
-    private $buildForDsm6 = true;
+    private $buildForDsm6 = false;
 
     /**
      * @var array List des réseaux sociaux
@@ -92,7 +92,7 @@ class YGGTorrentDLM
         $this->socials = array(
             'mastodon' => array(
                 'url' => 'mamot.fr/@YggTorrent',
-                'class' => 'account__header__fields'
+                'class' => 'translate'
             )        
             /*'twitter' => array(
                 'url' => 'twitter.com/yggtorrent_p2p',
@@ -183,7 +183,6 @@ class YGGTorrentDLM
         {
             $this->query = $query;
             $url = $this->subDomain . $this->domain . preg_replace(array('/\$1/', '/\$2/'), array(urlencode($this->query), 0), $this->searchPath);
-
             return $this->Request($url, $curl, true);
         }
 
@@ -355,7 +354,8 @@ class YGGTorrentDLM
         $this->Debug('Recuperation du nom de domaine');
 
         $xpath = $this->Request($social['url']);
-        $this->domain = $xpath->query("//*[contains(@class, '" . $social['class'] . "')]");
+        //$this->domain = $xpath->query("//*[contains(@class, '" . $social['class'] . "')]");
+        $this->domain = $xpath->query("//link[@rel='me']/@href");
         preg_match('/([a-zA-Z0-9-]+\.)*([a-zA-Z0-9-]+\.[a-zA-Z0-9-]+)/', $this->domain[0]->textContent, $match);
         $this->domain = $match[2];
 

@@ -1,11 +1,11 @@
 {
-    "name": "YGGTorrent",
-    "displayname": "YGGTorrent",
-    "description": "YGGTorrent Tracker privé",
-    "version": "1.3.5",
-    "accountsupport": true,
-    "site": "https://yggtorrent.fi/",
-    "module": "search.php",
-    "type": "search",
-    "class": "YGGTorrentDLM"
+  "name": "YGGTorrent",
+  "displayname": "YGGTorrent",
+  "description": "YGGTorrent Tracker privé",
+  "version": "1.3.6",
+  "accountsupport": true,
+  "site": "https://yggtorrent.fi/",
+  "module": "search.php",
+  "type": "search",
+  "class": "YGGTorrentDLM"
 }
