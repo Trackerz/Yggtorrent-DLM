@@ -45,7 +45,7 @@ class YGGTorrentDLM
     /**
      * @var bool Selectionne la version du build
      */
-    private $buildForDsm6 = false;
+    private $buildForDsm6 = true;
 
     /**
      * @var array List des réseaux sociaux
@@ -90,18 +90,11 @@ class YGGTorrentDLM
         $this->document = new DOMDocument();
 
         $this->socials = array(
-            'mastodon' => array(
+             array(
+                'name' => 'mastodon',
                 'url' => 'mamot.fr/@YggTorrent',
                 'class' => 'translate'
-            )        
-            /*'twitter' => array(
-                'url' => 'twitter.com/yggtorrent_p2p',
-                'class' => 'twitter-timeline-link'
-            ),            
-            'telegram' => array(
-                'url' => 't.me/yggtorrent',
-                'class' => 'tgme_page_description'
-            )*/
+            )
         );
 
         $this->categories = [
@@ -121,8 +114,8 @@ class YGGTorrentDLM
             2156 => 'Presse',
 
             // Emulation
-            2157 => 'Emulateurs',
-            2158 => 'Roms',
+            2157 => 'Emulateur',
+            2158 => 'ROM/ISO',
 
             // Jeux
             2159 => 'Linux',
@@ -164,7 +157,17 @@ class YGGTorrentDLM
             // Adulte (on dit merci qui? :p)
             2189 => 'Film',
             2190 => 'Hentai',
-            2191 => 'Image'
+            2191 => 'Image',
+
+            //Nulled
+            2304 => 'Divers',
+            2303 => 'Mobile',
+            2302 => 'Scripts PHP & CMS',
+            2301 => 'Wordpress',
+
+            //Imprimante 3D
+            2201 => 'Objets',
+            2202 => 'Personnages'
         ];
     }
 
@@ -236,16 +239,8 @@ class YGGTorrentDLM
         $this->Debug('Verification des identifiants');
 
         $this->DeleteCookie();
-
-        foreach($this->socials as $social)
-        {
-            $this->GetDomain($social);
-
-            if (strlen($this->domain) > 0)
-            {
-                break;
-            }
-        }
+        
+        $this->GetDomain($this->socials[0]);
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_POSTFIELDS, array('id' => urlencode($username), 'pass' => urlencode($password)));
@@ -282,7 +277,7 @@ class YGGTorrentDLM
                     $this->downloadUrl
                 ),
                 $this->GetSize($item->childNodes[11 - $i]->textContent),
-                (new DateTime())->setTimestamp(explode(' ', $item->childNodes[9 - $i]->textContent)[0])->format('Y-m-d H:i:s'),
+                (new DateTime())->setTimestamp(explode(' ', trim($item->childNodes[9 - $i]->textContent))[0])->format('Y-m-d H:i:s'),
                 $item->childNodes[3 - $i]->firstChild->getAttribute('href'),
                 $item->childNodes[5 - $i]->firstChild->getAttribute('target'),
                 (int)$item->childNodes[15 - $i]->textContent,
@@ -354,7 +349,6 @@ class YGGTorrentDLM
         $this->Debug('Recuperation du nom de domaine');
 
         $xpath = $this->Request($social['url']);
-        //$this->domain = $xpath->query("//*[contains(@class, '" . $social['class'] . "')]");
         $this->domain = $xpath->query("//link[@rel='me']/@href");
         preg_match('/([a-zA-Z0-9-]+\.)*([a-zA-Z0-9-]+\.[a-zA-Z0-9-]+)/', $this->domain[0]->textContent, $match);
         $this->domain = $match[2];
@@ -464,6 +458,7 @@ class YGGTorrentDLM
     {
         if($this->debug)
         {
+            echo $data . '</br>';
             file_put_contents('/tmp/yggtorrent.log', (new Datetime())->format('d-m-Y H:i:s') . ' : ' . $data . PHP_EOL, FILE_APPEND);
         }
     }
