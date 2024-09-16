@@ -30,7 +30,7 @@ class YGGTorrentDLM
     /**
      * @var string Url de connexion
      */
-    const AUTH_PATH = '/user/login';
+		const AUTH_PATH = '/auth/process_login';	
 
     /**
      * @var string Url du fichier ygg.php
@@ -55,12 +55,12 @@ class YGGTorrentDLM
     /**
      * @var string Nom de domaine
      */
-    private $domain;
+    private $domain = 'ygg.re';
 
     /**
      * @var string Sous domaine de recherche
      */
-    private $subDomain;
+    private $subDomain = 'www.';
 
     /**
      * @var DOMDocument Instance de DOMDocument
@@ -174,7 +174,7 @@ class YGGTorrentDLM
     /**
      * Synology - Execute la requête de recherche
      *
-     * @param resource $curl CURL
+     * @param \CurlHandle $curl CURL
      * @param string $query Recherche de l'utilisateur
      * @param string $username Identifiant
      * @param string $password Mot de passe
@@ -219,7 +219,11 @@ class YGGTorrentDLM
 
                 for ($i = 1; $i <= $totalPages; $i++)
                 {
-                    $url = $this->subDomain . $this->domain . preg_replace(array('/\$1/', '/\$2/'), array(urlencode($this->query), $i * 50), $this->searchPath);
+                    $url = $this->subDomain . $this->domain . preg_replace(
+                        array('/\$1/', '/\$2/'), 
+                        array(urlencode($this->query), $i * 50), 
+                        $this->searchPath
+                    );
                     $xpath = $this->Request($url);
                     $this->ParseContent($plugin, $xpath);
                 }
@@ -238,15 +242,20 @@ class YGGTorrentDLM
     {
         $this->Debug('Verification des identifiants');
 
-        $this->DeleteCookie();
-        
+        $this->DeleteCookie();        
         $this->GetDomain($this->socials[0]);
 
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_POSTFIELDS, array('id' => urlencode($username), 'pass' => urlencode($password)));
-        $this->Request($this->domain . self::AUTH_PATH, $curl);
+        $this->Request(
+            $this->subDomain . $this->domain . self::AUTH_PATH, 
+            null,
+            false, 
+            array(
+                'id' => $username, 
+                'pass' => $password
+            )
+        );
 
-        $xpath = $this->Request($this->domain);
+        $xpath = $this->Request($this->subDomain . $this->domain);
         $ratio = $xpath->query("//*[contains(@class, 'ico_upload')]");
 
         return $ratio->length > 0;
@@ -297,7 +306,7 @@ class YGGTorrentDLM
         if (file_exists(self::COOKIE)) 
         {
             unlink(self::COOKIE);
-            $this->Debug('Cookie supprime');
+            $this->Debug('Cookie supprimé');
         }
     }
 
@@ -305,34 +314,52 @@ class YGGTorrentDLM
      * Exécute la requête CURL et retourne la page
      *
      * @param string $url URL de la page
-     * @param resource $curl CURL
+     * @param \CurlHandle|null $curl CURL
      * @param bool $prepare Indique si CURL est initialisé par Synology ou par l'utilisateur
      * @return DOMXPath Retourne la page ou NULL
      */
-    private function Request($url, $curl = null, $prepare = false)
+    private function Request($url, $curl = null, $prepare = false, $credentials = null)
     {
-        if (!isset($curl))
-            $curl = curl_init();
-
-        curl_setopt_array($curl, [
-            CURLOPT_USERAGENT => 'Googlebot/2.1',
-            CURLOPT_URL => 'https://' . $url,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_SSL_VERIFYHOST => false,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_COOKIEFILE => self::COOKIE,
-            CURLOPT_COOKIEJAR => self::COOKIE
-        ]);
-
-        if (!$prepare)
+        if ($curl === null)
         {
+            $curl = curl_init();
+        }
+        
+        curl_setopt($curl, CURLOPT_USERAGENT, 'Googlebot/2.1');
+        curl_setopt($curl, CURLOPT_URL, 'https://' . $url);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_COOKIEFILE, self::COOKIE);
+        curl_setopt($curl, CURLOPT_COOKIEJAR, self::COOKIE);
+
+        if($this->debug) {
+            curl_setopt($curl, CURLINFO_HEADER_OUT, true);
+            curl_setopt($curl, CURLOPT_HEADER, true);
+        }
+
+        if($credentials) 
+        {
+            curl_setopt($curl, CURLOPT_POST, false);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $credentials);
+        }
+
+        
+        if (!$prepare)
+        {					
             $content = curl_exec($curl);
             curl_close($curl);
         }
 
-        if (!isset($content))
+
+        if (!isset($content)) {
             return null;
+        }
+
+        if($this->debug) {
+            echo $content;
+        }
 
         @$this->document->loadHTML('<?xml encoding="utf-8" ?>' . $content);
 
@@ -349,8 +376,8 @@ class YGGTorrentDLM
         $this->Debug('Recuperation du nom de domaine');
 
         $xpath = $this->Request($social['url']);
-        $this->domain = $xpath->query("//link[@rel='me']/@href");
-        preg_match('/([a-zA-Z0-9-]+\.)*([a-zA-Z0-9-]+\.[a-zA-Z0-9-]+)/', $this->domain[0]->textContent, $match);
+        $data = $xpath->query("//link[@rel='me']/@href");
+        preg_match('/([a-zA-Z0-9-]+\.)*([a-zA-Z0-9-]+\.[a-zA-Z0-9-]+)/', $data[0]->textContent, $match);
         $this->domain = $match[2];
 
         $this->Debug('Nom de domaine : ' . $this->domain);
@@ -363,12 +390,13 @@ class YGGTorrentDLM
      */
     private function GetSubDomain()
     {
-        $this->Debug('Recuperation du sous domaine');
+        //$this->Debug('Recuperation du sous domaine');
 
-        $xpath = $this->Request($this->domain);
-        $this->subDomain = $xpath->query("//*[contains(@class, 'search')]");
-        preg_match('/[a-zA-Z0-9-]+\./', $this->subDomain[0]->getAttribute('action'), $match);
-        $this->subDomain = $match[0];
+        //$xpath = $this->Request($this->domain);
+        //$this->subDomain = $xpath->query("//*[contains(@class, 'search')]");
+        //preg_match('/[a-zA-Z0-9-]+\./', $this->subDomain[0]->getAttribute('action'), $match);
+        //$this->subDomain = $match[0];
+        $this->subDomain = 'www.'; //$match[0];
 
         $this->Debug('Sous domaine : ' . $this->subDomain);
     }
