@@ -1,15 +1,20 @@
 <?php
-
 /**
  * /!\ Ne pas modifier ce fichier /!\
  * /!\ Ne pas modifier ce fichier /!\
  * /!\ Ne pas modifier ce fichier /!\
  */
 
-$curl = curl_init();
+$curl = curl_init();     
 
 curl_setopt_array($curl, [
-    CURLOPT_USERAGENT => 'Googlebot/2.1',
+    CURLOPT_HTTPHEADER => [
+        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0',
+        'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8',
+        'TE: trailers',
+        'Upgrade-Insecure-Requests: 1',
+        'Cookie: account_created=true; cf_clearance=; ygg_='
+    ],
     CURLOPT_URL => $_GET['torrent'],
     CURLOPT_SSL_VERIFYPEER => false,
     CURLOPT_SSL_VERIFYHOST => false,

@@ -55,7 +55,7 @@ class YGGTorrentDLM
     /**
      * @var string Nom de domaine
      */
-    private $domain = 'ygg.re';
+    private $domain = '';
 
     /**
      * @var string Sous domaine de recherche
@@ -324,8 +324,16 @@ class YGGTorrentDLM
         {
             $curl = curl_init();
         }
-        
-        curl_setopt($curl, CURLOPT_USERAGENT, 'Googlebot/2.1');
+
+        $headers = [
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0',
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8',
+            'TE: trailers',
+            'Upgrade-Insecure-Requests: 1',
+            'Cookie: account_created=true; cf_clearance=; ygg_='
+        ];          
+          
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);     
         curl_setopt($curl, CURLOPT_URL, 'https://' . $url);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
