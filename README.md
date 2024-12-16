@@ -10,7 +10,7 @@ La récupération du nom de domaine se fait automatiquement depuis [Mastodon](ht
 # Installation :  
 
 - Installer **WebStation**
-- Installer **PHP 7.4** 
+- Installer **PHP 7.3** ou **PHP 7.4** 
 - Ouvrir **WebStation** 
   - Aller dans **Paramètres PHP > Modifier** et cocher les extensions **CURL**
   - DMS 7 Aller dans **Portail de services web > Modifier le serveur web par défaut > selectionner la version de PHP**
